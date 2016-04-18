@@ -2,6 +2,8 @@
 
 const pino = require('pino')
 
+const levels = ['trace', 'debug', 'info', 'warn', 'error']
+
 function register (server, options, next) {
   options.stream = options.stream || process.stdout
   options.serializers = options.serializers || {}
@@ -12,7 +14,7 @@ function register (server, options, next) {
   const logger = pino(options, options.stream)
 
   // expose logger as 'server.loginfo()' etc methods
-  ;['trace', 'debug', 'info', 'warn', 'error'].forEach((level) => {
+  levels.forEach((level) => {
     server.decorate('server', 'log' + level, logger[level].bind(logger))
   })
 
@@ -26,6 +28,14 @@ function register (server, options, next) {
   server.ext('onRequest', (request, reply) => {
     request.logger = logger.child({ req: request })
     reply.continue()
+  })
+
+  server.on('log', (event, tags) => {
+    Object.keys(tags).forEach((tag) => {
+      if (levels.indexOf(tag) !== -1) {
+        server['log' + tag](event)
+      }
+    })
   })
 
   // log when a request completes with an error

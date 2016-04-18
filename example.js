@@ -14,7 +14,7 @@ server.route({
   method: 'GET',
   path: '/',
   handler: function (request, reply) {
-    request.server.logtrace(request.path, 'In handler')
+    server.log(['info', 'trace'], 'Request into hello world')
     return reply('hello world')
   }
 })
