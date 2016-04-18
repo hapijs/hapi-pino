@@ -11,12 +11,15 @@ function register (server, options, next) {
   options.serializers.res = pino.stdSerializers.res
   options.serializers.err = pino.stdSerializers.err
 
-  const logger = pino(options, options.stream)
+  const tagToLevels = options.tags || {}
+  const allTags = options.allTags
 
-  // expose logger as 'server.loginfo()' etc methods
-  levels.forEach((level) => {
-    server.decorate('server', 'log' + level, logger[level].bind(logger))
-  })
+  const validTags = Object.keys(tagToLevels).filter((key) => levels.indexOf(tagToLevels[key]) < 0).length === 0
+  if (!validTags || allTags && levels.indexOf(allTags) < 0) {
+    return next(new Error('invalid tag levels'))
+  }
+
+  const logger = pino(options, options.stream)
 
   // expose logger as 'server.app.logger'
   server.app.logger = logger
@@ -30,12 +33,18 @@ function register (server, options, next) {
     reply.continue()
   })
 
-  server.on('log', (event, tags) => {
-    Object.keys(tags).forEach((tag) => {
-      if (levels.indexOf(tag) !== -1) {
-        server['log' + tag](event)
+  server.on('log', (event) => {
+    const tags = event.tags
+    for (var i = 0; i < tags.length; i++) {
+      let level = tagToLevels[tags[i]]
+      if (level) {
+        logger[level](event)
+        break
       }
-    })
+    }
+    if (allTags) {
+      logger[allTags](event)
+    }
   })
 
   // log when a request completes with an error

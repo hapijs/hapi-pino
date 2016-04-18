@@ -38,6 +38,20 @@ function registerWithSink (server, level, func, registered) {
   server.register(plugin, registered)
 }
 
+function tagsWithSink (server, tags, func, registered) {
+  const stream = sink(func)
+  const plugin = {
+    register: Pino.register,
+    options: {
+      stream: stream,
+      level: 'debug',
+      tags: tags
+    }
+  }
+
+  server.register(plugin, registered)
+}
+
 function onHelloWorld (data) {
   expect(data.msg).to.equal('hello world')
 }
@@ -194,6 +208,75 @@ experiment('logs each request', () => {
     }, (err) => {
       expect(err).to.be.undefined()
       server.inject('/')
+    })
+  })
+})
+
+experiment('logs through server.log', () => {
+  ltest((level, done) => {
+    const server = getServer()
+    tagsWithSink(server, {
+      aaa: 'info'
+    }, (data) => {
+      expect(data.data).to.equal('hello world')
+      expect(data.level).to.equal(30)
+      done()
+    }, (err) => {
+      expect(err).to.be.undefined()
+      server.log(['aaa'], 'hello world')
+    })
+  })
+
+  test('one log for multiple tags', (done) => {
+    const server = getServer()
+    tagsWithSink(server, {
+      aaa: 'info',
+      bbb: 'warn'
+    }, (data) => {
+      expect(data.data).to.equal('hello world')
+      // first matching tag
+      expect(data.level).to.equal(30)
+      done()
+    }, (err) => {
+      expect(err).to.be.undefined()
+      server.log(['aaa', 'bbb'], 'hello world')
+    })
+  })
+
+  test('explode with a wrong level', (done) => {
+    const server = getServer()
+    server.register({
+      register: Pino.register,
+      options: {
+        tags: {
+          bbb: 'not a level'
+        }
+      }
+    }, (err) => {
+      expect(err).to.be.error()
+      done()
+    })
+  })
+
+  test('with tag catchall', (done) => {
+    const server = getServer()
+    const stream = sink((data) => {
+      expect(data.data).to.equal('hello world')
+      expect(data.level).to.equal(20)
+      done()
+    })
+    const plugin = {
+      register: Pino.register,
+      options: {
+        stream: stream,
+        level: 'debug',
+        allTags: 'debug'
+      }
+    }
+
+    server.register(plugin, (err) => {
+      expect(err).to.be.undefined()
+      server.log(['something'], 'hello world')
     })
   })
 })
