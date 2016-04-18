@@ -3,8 +3,7 @@
 const pino = require('pino')
 
 function register (server, options, next) {
-  options = options || {}
-
+  options.stream = options.stream || process.stdout
   options.serializers = options.serializers || {}
   options.serializers.req = asReqValue
   options.serializers.res = pino.stdSerializers.res
