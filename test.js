@@ -106,6 +106,26 @@ experiment('logs each request', () => {
       expect(data.res.statusCode).to.equal(404)
       expect(data.req.id).to.exist()
       expect(data.msg).to.equal('request completed')
+      expect(data.responseTime).to.be.at.least(0)
+      done()
+    }, (err) => {
+      expect(err).to.be.undefined()
+      server.inject('/')
+    })
+  })
+
+  test('track responseTime', (done) => {
+    const server = getServer()
+    server.route({
+      path: '/',
+      method: 'GET',
+      handler: (req, reply) => setTimeout(reply, 10, 'hello world')
+    })
+    registerWithSink(server, 'info', (data) => {
+      expect(data.res.statusCode).to.equal(200)
+      expect(data.req.id).to.exist()
+      expect(data.msg).to.equal('request completed')
+      expect(data.responseTime).to.be.at.least(10)
       done()
     }, (err) => {
       expect(err).to.be.undefined()

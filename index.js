@@ -39,7 +39,11 @@ function register (server, options, next) {
 
   // log when a request completes
   server.on('response', (request) => {
-    request.logger.info({ res: request.raw.res }, 'request completed')
+    const info = request.info
+    request.logger.info({
+      res: request.raw.res,
+      responseTime: info.responded - info.received
+    }, 'request completed')
   })
 
   server.ext('onPostStart', () => {
