@@ -14,7 +14,7 @@ server.route({
   method: 'GET',
   path: '/',
   handler: function (request, reply) {
-    request.server.logtrace(request.path, 'In handler')
+    request.logger.info('In handler %s', request.path)
     return reply('hello world')
   }
 })
@@ -30,7 +30,8 @@ server.register({
     process.exit(1)
   }
 
-  server.loginfo('Pino is registered')
+  server.app.logger.warn('Pino is registered')
+  server.logger().info('another way for accessing it')
 
   // Start the server
   server.start((err) => {
