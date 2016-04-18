@@ -44,7 +44,7 @@ function tagsWithSink (server, tags, func, registered) {
     register: Pino.register,
     options: {
       stream: stream,
-      level: 'debug',
+      level: 'trace',
       tags: tags
     }
   }
@@ -277,6 +277,32 @@ experiment('logs through server.log', () => {
     server.register(plugin, (err) => {
       expect(err).to.be.undefined()
       server.log(['something'], 'hello world')
+    })
+  })
+})
+
+experiment('logs through request.log', () => {
+  ltest((level, done) => {
+    const server = getServer()
+    server.route({
+      path: '/',
+      method: 'GET',
+      handler: (req, reply) => {
+        req.log(['aaa'], 'hello logger')
+        reply('hello world')
+      }
+    })
+    tagsWithSink(server, {
+      aaa: level
+    }, (data, enc, cb) => {
+      if (data.tags) {
+        expect(data.data).to.equal('hello logger')
+        done()
+      }
+      cb()
+    }, (err) => {
+      expect(err).to.be.undefined()
+      server.inject('/')
     })
   })
 })

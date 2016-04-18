@@ -14,7 +14,7 @@ server.route({
   method: 'GET',
   path: '/',
   handler: function (request, reply) {
-    server.log(['info', 'trace'], 'Request into hello world')
+    request.log(['a', 'b'], 'Request into hello world')
     request.logger.info('In handler %s', request.path)
     return reply('hello world')
   }
@@ -23,7 +23,8 @@ server.route({
 server.register({
   register: require('.').register,
   options: {
-    extreme: false
+    extreme: false,
+    allTags: 'info'
   }
 }, (err) => {
   if (err) {
@@ -33,6 +34,7 @@ server.register({
 
   server.app.logger.warn('Pino is registered')
   server.logger().info('another way for accessing it')
+  server.log(['subsystem'], 'third way for accessing it')
 
   // Start the server
   server.start((err) => {

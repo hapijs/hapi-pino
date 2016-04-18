@@ -34,17 +34,11 @@ function register (server, options, next) {
   })
 
   server.on('log', (event) => {
-    const tags = event.tags
-    for (var i = 0; i < tags.length; i++) {
-      let level = tagToLevels[tags[i]]
-      if (level) {
-        logger[level](event)
-        break
-      }
-    }
-    if (allTags) {
-      logger[allTags](event)
-    }
+    logEvent(logger, event)
+  })
+
+  server.on('request', (request, event) => {
+    logEvent(request.logger, event)
   })
 
   // log when a request completes with an error
@@ -73,6 +67,21 @@ function register (server, options, next) {
   })
 
   next()
+
+  function logEvent (current, event) {
+    const tags = event.tags
+    const data = event.data
+    for (var i = 0; i < tags.length; i++) {
+      let level = tagToLevels[tags[i]]
+      if (level) {
+        current[level]({ tags, data })
+        break
+      }
+    }
+    if (allTags) {
+      current[allTags]({ tags, data })
+    }
+  }
 }
 
 function asReqValue (req) {
