@@ -50,17 +50,6 @@ function ltest (func) {
   })
 }
 
-experiment('logs through the server', () => {
-  ltest((level, done) => {
-    const server = getServer()
-    registerWithSink(server, level, onHelloWorld, (err) => {
-      expect(err).to.be.undefined()
-      server['log' + level]('hello world')
-      done()
-    })
-  })
-})
-
 experiment('logs through the server.app.logger', () => {
   ltest((level, done) => {
     const server = getServer()
