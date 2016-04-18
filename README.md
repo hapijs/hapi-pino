@@ -3,8 +3,10 @@
 [Hapi](http://hapijs.com) plugin for the [Pino](https://github.com/mcollina/pino) logger. It logs in JSON for easy
 post-processing.
 It is faster than [good](http://npm.im/good) console logger by a 25%
-factor (40% when using [extreme
-mode](https://github.com/mcollina/pino#extreme)
+factor, which increases to 40% when using [extreme
+mode](https://github.com/mcollina/pino#extreme)). Using hapi-pino in
+extreme mode allows the "hello world" example to handle 40% more
+throughput than good.
 
 ## Install
 
