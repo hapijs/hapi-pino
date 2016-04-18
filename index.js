@@ -42,6 +42,14 @@ function register (server, options, next) {
     request.logger.info({ res: request.raw.res }, 'request completed')
   })
 
+  server.ext('onPostStart', () => {
+    logger.info(server.info, 'server started')
+  })
+
+  server.ext('onPostStop', () => {
+    logger.info(server.info, 'server stopped')
+  })
+
   next()
 }
 

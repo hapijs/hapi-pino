@@ -83,6 +83,22 @@ experiment('logs through the server.logger()', () => {
   })
 })
 
+test('log on server start', (done) => {
+  const server = getServer()
+  registerWithSink(server, 'info', (data, enc, cb) => {
+    expect(data).to.include(server.info)
+    expect(data.msg).to.equal('server started')
+    cb()
+    done()
+  }, (err) => {
+    expect(err).to.be.undefined()
+    server.start((err) => {
+      console.log('server started')
+      expect(err).to.be.null()
+    })
+  })
+})
+
 experiment('logs each request', () => {
   test('at default level', (done) => {
     const server = getServer()
