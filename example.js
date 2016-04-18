@@ -9,29 +9,34 @@ server.connection({
   port: 3000
 })
 
-server.register({
-  register: require('.').register,
-  options: {
-    extreme: true
-  }
-}, (err) => {
-  if (err) {
-    throw err
-  }
-})
-
 // Add the route
 server.route({
   method: 'GET',
   path: '/',
   handler: function (request, reply) {
+    request.server.logtrace(request.path, 'In handler')
     return reply('hello world')
   }
 })
 
-// Start the server
-server.start((err) => {
-  if (err) {
-    throw err
+server.register({
+  register: require('.').register,
+  options: {
+    extreme: false
   }
+}, (err) => {
+  if (err) {
+    console.error(err)
+    process.exit(1)
+  }
+
+  server.loginfo('Pino is registered')
+
+  // Start the server
+  server.start((err) => {
+    if (err) {
+      console.error(err)
+      process.exit(1)
+    }
+  })
 })
