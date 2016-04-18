@@ -1,0 +1,39 @@
+{
+  "name": "hapi-pino",
+  "version": "0.0.1",
+  "description": "Hapi plugin for the Pino logger ",
+  "main": "index.js",
+  "scripts": {
+    "test": "standard && lab test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcollina/hapi-pino.git"
+  },
+  "keywords": [
+    "hapi",
+    "pino",
+    "logger",
+    "fast",
+    "slow",
+    "json"
+  ],
+  "author": "Matteo Collina <hello@matteocollina.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mcollina/hapi-pino/issues"
+  },
+  "homepage": "https://github.com/mcollina/hapi-pino#readme",
+  "devDependencies": {
+    "code": "^2.2.0",
+    "flush-write-stream": "^1.0.0",
+    "hapi": "^13.3.0",
+    "lab": "^10.3.1",
+    "pre-commit": "^1.1.2",
+    "split2": "^2.0.1",
+    "standard": "^6.0.8"
+  },
+  "dependencies": {
+    "pino": "^2.1.4"
+  }
+}
