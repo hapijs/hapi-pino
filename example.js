@@ -9,7 +9,12 @@ server.connection({
   port: 3000
 })
 
-server.register(require('.'), (err) => {
+server.register({
+  register: require('.').register,
+  options: {
+    extreme: true
+  }
+}, (err) => {
   if (err) {
     throw err
   }
@@ -29,5 +34,4 @@ server.start((err) => {
   if (err) {
     throw err
   }
-  console.log('Server running at:', server.info.uri)
 })
