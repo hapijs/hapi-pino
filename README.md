@@ -4,7 +4,7 @@
 post-processing.
 It is faster than [good](http://npm.im/good) console logger by a 25%
 factor, which increases to 40% when using [extreme
-mode](https://github.com/mcollina/pino#extreme)). Using hapi-pino in
+mode](https://github.com/mcollina/pino#extreme). Using hapi-pino in
 extreme mode allows the "hello world" example to handle 40% more
 throughput than good.
 
