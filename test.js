@@ -279,6 +279,26 @@ experiment('logs through server.log', () => {
       server.log(['something'], 'hello world')
     })
   })
+
+  test('default tag catchall', (done) => {
+    const server = getServer()
+    const stream = sink((data) => {
+      expect(data.data).to.equal('hello world')
+      expect(data.level).to.equal(30)
+      done()
+    })
+    const plugin = {
+      register: Pino.register,
+      options: {
+        stream: stream
+      }
+    }
+
+    server.register(plugin, (err) => {
+      expect(err).to.be.undefined()
+      server.log(['something'], 'hello world')
+    })
+  })
 })
 
 experiment('logs through request.log', () => {

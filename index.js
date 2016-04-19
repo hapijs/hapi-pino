@@ -12,7 +12,7 @@ function register (server, options, next) {
   options.serializers.err = pino.stdSerializers.err
 
   const tagToLevels = options.tags || {}
-  const allTags = options.allTags
+  const allTags = options.allTags || 'info'
 
   const validTags = Object.keys(tagToLevels).filter((key) => levels.indexOf(tagToLevels[key]) < 0).length === 0
   if (!validTags || allTags && levels.indexOf(allTags) < 0) {
@@ -75,7 +75,7 @@ function register (server, options, next) {
       let level = tagToLevels[tags[i]]
       if (level) {
         current[level]({ tags, data })
-        break
+        return
       }
     }
     if (allTags) {
