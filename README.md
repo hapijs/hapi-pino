@@ -68,6 +68,56 @@ server.register(require('hapi-pino'), (err) => {
 })
 ```
 
+## API
+
+- [Options](#options)
+- [Server decorations](#serverdecorations)
+- [Request decorations](#requestdecorations)
+- [Hapi Events](#hapievents)
+
+**hapi-pino** goal is to enable Hapi applications to log via [pino][pino]. To enable this, it decorates both the [server](#serverdecorations) and the [request](#requestadditions). Moreover, **hapi-pino**
+ binds to the Hapi events system as described in the ["Hapi
+events"](#hapievents) section.
+
+### Options
+
+- `[stream]` - the binary stream to write stuff to, defaults to
+  `process.stdout`.
+- `[tags]` - a map to specify pairs of Hapi log tags and levels.
+- `[allTags]` - the logging level to apply to all tags not matched by
+  `tags`, defaults to `'info'`.
+
+
+<a name="serverdecorations"></a>
+### Server Decorations
+
+**hapi-pino** decorates the Hapi server with:
+
+* `server.logger()`, which is a function that returns the current instance of
+  [pino][pino], see its doc for the way to actual log.
+* `server.app.logger`, same as before, but the logger it is also
+  attached to the `server.app` object.
+
+<a name="requestdecorations"></a>
+### Request Decorations
+
+**hapi-pino** decorates the Hapi request with:
+
+* `request.logger`, which is an instance of [pino][pino] bound to the current request, so you can trace all the logs of a given request. See [pino][pino] doc for the way to actual log.
+
+<a name="hapievents"></a>
+### Hapi Events
+
+**hapi-pino** listens to some Hapi events:
+
+* `'onRequest'`, to create a request-specific child logger
+* `'response'`, to log at `'info'` level when a request is completed
+* `'response-error'`, to log at `'warn'` level when a request errors
+* `'log'`, to support logging via the Hapi `server.log()` and
+  `request.log()` methods, see `tags` and `allTags` options.
+* `'onPostStart'`, to log when the server is started
+* `'onPostStopt'`, to log when the server is stopped
+
 ## Acknowledgements
 
 This project was kindly sponsored by [nearForm](http://nearform.com).
@@ -75,3 +125,5 @@ This project was kindly sponsored by [nearForm](http://nearform.com).
 ## License
 
 MIT
+
+[pino]: https://github.com/mcollina/pino
