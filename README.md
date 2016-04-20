@@ -1,4 +1,5 @@
-# hapi-pino
+# hapi-pino&nbsp;&nbsp;[![Build Status](https://travis-ci.org/mcollina/hapi-pino.svg)](https://travis-ci.org/mcollina/hapi-pino)
+
 
 [Hapi](http://hapijs.com) plugin for the [Pino](https://github.com/mcollina/pino) logger. It logs in JSON for easy
 post-processing.
