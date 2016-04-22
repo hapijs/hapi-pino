@@ -19,7 +19,15 @@ function register (server, options, next) {
     return next(new Error('invalid tag levels'))
   }
 
-  const logger = pino(options, options.stream)
+  let stream = options.stream || process.stdout
+
+  if (options.prettyPrint) {
+    let pretty = pino.pretty()
+    pretty.pipe(stream)
+    stream = pretty
+  }
+
+  const logger = pino(options, stream)
 
   // expose logger as 'server.app.logger'
   server.app.logger = logger
