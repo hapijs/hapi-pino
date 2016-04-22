@@ -34,6 +34,6 @@
     "standard": "^6.0.8"
   },
   "dependencies": {
-    "pino": "^2.1.4"
+    "pino": "^2.2.0"
   }
 }

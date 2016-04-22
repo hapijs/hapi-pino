@@ -84,6 +84,9 @@ events"](#hapievents) section.
 
 - `[stream]` - the binary stream to write stuff to, defaults to
   `process.stdout`.
+- `[prettyPrint]` - pretty print the logs (same as `node server |
+  pino`), disable in production. Default is `false`, enable in
+  development by passing `true`.
 - `[tags]` - a map to specify pairs of Hapi log tags and levels.
 - `[allTags]` - the logging level to apply to all tags not matched by
   `tags`, defaults to `'info'`.

@@ -24,7 +24,12 @@ server.route({
   }
 })
 
-server.register(require('.'), (err) => {
+server.register({
+  register: require('.').register,
+  options: {
+    prettyPrint: true
+  }
+}, (err) => {
   if (err) {
     console.error(err)
     process.exit(1)
