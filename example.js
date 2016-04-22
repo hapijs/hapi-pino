@@ -27,7 +27,7 @@ server.route({
 server.register({
   register: require('.').register,
   options: {
-    prettyPrint: true
+    prettyPrint: process.env.NODE_ENV !== 'production'
   }
 }, (err) => {
   if (err) {
