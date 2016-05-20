@@ -96,8 +96,7 @@ test('log on server start', (done) => {
   }, (err) => {
     expect(err).to.be.undefined()
     server.start((err) => {
-      console.log('server started')
-      expect(err).to.be.null()
+      expect(err).to.be.undefined()
     })
   })
 })

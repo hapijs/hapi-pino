@@ -66,12 +66,14 @@ function register (server, options, next) {
     }, 'request completed')
   })
 
-  server.ext('onPostStart', () => {
+  server.ext('onPostStart', (s, cb) => {
     logger.info(server.info, 'server started')
+    cb()
   })
 
-  server.ext('onPostStop', () => {
+  server.ext('onPostStop', (s, cb) => {
     logger.info(server.info, 'server stopped')
+    cb()
   })
 
   next()
