@@ -5,11 +5,27 @@ const pino = require('pino')
 const levels = ['trace', 'debug', 'info', 'warn', 'error']
 
 function register (server, options, next) {
-  options.stream = options.stream || process.stdout
   options.serializers = options.serializers || {}
   options.serializers.req = asReqValue
   options.serializers.res = pino.stdSerializers.res
   options.serializers.err = pino.stdSerializers.err
+
+  let logger
+  if (options.instance) {
+    options.instance.serializers = Object.assign(options.serializers, options.instance.serializers)
+    logger = options.instance
+  } else {
+    options.stream = options.stream || process.stdout
+    let stream = options.stream || process.stdout
+
+    if (options.prettyPrint) {
+      let pretty = pino.pretty()
+      pretty.pipe(stream)
+      stream = pretty
+    }
+
+    logger = pino(options, stream)
+  }
 
   const tagToLevels = options.tags || {}
   const allTags = options.allTags || 'info'
@@ -18,16 +34,6 @@ function register (server, options, next) {
   if (!validTags || allTags && levels.indexOf(allTags) < 0) {
     return next(new Error('invalid tag levels'))
   }
-
-  let stream = options.stream || process.stdout
-
-  if (options.prettyPrint) {
-    let pretty = pino.pretty()
-    pretty.pipe(stream)
-    stream = pretty
-  }
-
-  const logger = pino(options, stream)
 
   // expose logger as 'server.app.logger'
   server.app.logger = logger
