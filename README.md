@@ -93,6 +93,8 @@ events"](#hapievents) section.
   mappings. The default level tags are exposed via `hapi-pino.levelTags`.
 - `[allTags]` - the logging level to apply to all tags not matched by
   `tags`, defaults to `'info'`.
+- `[instance]` - uses a previously created Pino instance as the logger.
+  The instance's `stream` and `serializers` take precedence.
 
 
 <a name="serverdecorations"></a>

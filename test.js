@@ -346,3 +346,56 @@ experiment('logs through request.log', () => {
     })
   })
 })
+
+experiment('uses a prior pino instance', () => {
+  test('without pre-defined serializers', (done) => {
+    const server = getServer()
+    const stream = sink((data) => {
+      expect(data.data).to.equal('hello world')
+      expect(data.level).to.equal(30)
+      done()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      register: Pino.register,
+      options: {
+        instance: logger
+      }
+    }
+
+    server.register(plugin, (err) => {
+      expect(err).to.be.undefined()
+      server.log(['something'], 'hello world')
+    })
+  })
+
+  test('with pre-defined serializers', (done) => {
+    const server = getServer()
+    const stream = sink((data) => {
+      expect(data.msg).to.equal('hello world')
+      expect(data.foo).to.exist()
+      expect(data.foo.serializedFoo).to.exist()
+      expect(data.foo.serializedFoo).to.equal('foo is bar')
+      expect(data.level).to.equal(30)
+      done()
+    })
+    const logger = require('pino')({
+      serializers: {
+        foo: (input) => {
+          return { serializedFoo: `foo is ${input}` }
+        }
+      }
+    }, stream)
+    const plugin = {
+      register: Pino.register,
+      options: {
+        instance: logger
+      }
+    }
+
+    server.register(plugin, (err) => {
+      expect(err).to.be.undefined()
+      server.app.logger.info({foo: 'bar'}, 'hello world')
+    })
+  })
+})
