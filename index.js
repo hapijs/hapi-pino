@@ -3,6 +3,13 @@
 const pino = require('pino')
 
 const levels = ['trace', 'debug', 'info', 'warn', 'error']
+module.exports.levelTags = {
+  trace: 'trace',
+  debug: 'debug',
+  info: 'info',
+  warn: 'warn',
+  error: 'error'
+}
 
 function register (server, options, next) {
   options.stream = options.stream || process.stdout
@@ -11,7 +18,7 @@ function register (server, options, next) {
   options.serializers.res = pino.stdSerializers.res
   options.serializers.err = pino.stdSerializers.err
 
-  const tagToLevels = options.tags || {}
+  const tagToLevels = Object.assign({}, module.exports.levelTags, options.tags)
   const allTags = options.allTags || 'info'
 
   const validTags = Object.keys(tagToLevels).filter((key) => levels.indexOf(tagToLevels[key]) < 0).length === 0
