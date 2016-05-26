@@ -324,4 +324,25 @@ experiment('logs through request.log', () => {
       server.inject('/')
     })
   })
+
+  test('uses default tag mapping', (done) => {
+    const server = getServer()
+    const stream = sink((data) => {
+      expect(data.data).to.equal('hello world')
+      expect(data.level).to.equal(20)
+      done()
+    })
+    const plugin = {
+      register: Pino.register,
+      options: {
+        stream: stream,
+        level: 'debug'
+      }
+    }
+
+    server.register(plugin, (err) => {
+      expect(err).to.be.undefined()
+      server.log(['debug'], 'hello world')
+    })
+  })
 })
