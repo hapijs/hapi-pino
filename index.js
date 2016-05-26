@@ -11,13 +11,13 @@ function register (server, options, next) {
   options.serializers.res = pino.stdSerializers.res
   options.serializers.err = pino.stdSerializers.err
 
-  const tagToLevels = options.tags || {
+  const tagToLevels = Object.assign({}, {
     trace: 'trace',
     debug: 'debug',
     info: 'info',
     warn: 'warn',
     error: 'error'
-  }
+  }, options.tags)
   const allTags = options.allTags || 'info'
 
   const validTags = Object.keys(tagToLevels).filter((key) => levels.indexOf(tagToLevels[key]) < 0).length === 0
