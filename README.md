@@ -90,7 +90,7 @@ events"](#hapievents) section.
 - `[tags]` - a map to specify pairs of Hapi log tags and levels. By default,
   the tags *trace*, *debug*, *info*, *warn*, and *error* map to their
   corresponding level. Any mappings you supply take precedence over the default
-  mappings.
+  mappings. The default level tags are exposed via `hapi-pino.levelTags`.
 - `[allTags]` - the logging level to apply to all tags not matched by
   `tags`, defaults to `'info'`.
 
