@@ -1,11 +1,11 @@
-# hapi-pino&nbsp;&nbsp;[![Build Status](https://travis-ci.org/mcollina/hapi-pino.svg)](https://travis-ci.org/mcollina/hapi-pino)
+# hapi-pino&nbsp;&nbsp;[![Build Status](https://travis-ci.org/pinojs/hapi-pino.svg)](https://travis-ci.org/pinojs/hapi-pino)
 
 
-[Hapi](http://hapijs.com) plugin for the [Pino](https://github.com/mcollina/pino) logger. It logs in JSON for easy
+[Hapi](http://hapijs.com) plugin for the [Pino](https://github.com/pinojs/pino) logger. It logs in JSON for easy
 post-processing.
 It is faster than [good](http://npm.im/good) console logger by a 25%
 factor, which increases to 40% when using [extreme
-mode](https://github.com/mcollina/pino#extreme). Using hapi-pino in
+mode](https://github.com/pinojs/pino#extreme). Using hapi-pino in
 extreme mode allows the "hello world" example to handle 40% more
 throughput than good.
 
@@ -135,4 +135,4 @@ This project was kindly sponsored by [nearForm](http://nearform.com).
 
 MIT
 
-[pino]: https://github.com/mcollina/pino
+[pino]: https://github.com/pinojs/pino

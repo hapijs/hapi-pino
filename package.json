@@ -6,10 +6,6 @@
   "scripts": {
     "test": "standard && lab test.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mcollina/hapi-pino.git"
-  },
   "keywords": [
     "hapi",
     "pino",
@@ -18,12 +14,7 @@
     "slow",
     "json"
   ],
-  "author": "Matteo Collina <hello@matteocollina.com>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/mcollina/hapi-pino/issues"
-  },
-  "homepage": "https://github.com/mcollina/hapi-pino#readme",
   "devDependencies": {
     "code": "^2.2.0",
     "flush-write-stream": "^1.0.0",
@@ -35,5 +26,14 @@
   },
   "dependencies": {
     "pino": "^2.2.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pinojs/hapi-pino.git"
+  },
+  "author": "David Mark Clements",
+  "bugs": {
+    "url": "https://github.com/pinojs/hapi-pino/issues"
+  },
+  "homepage": "https://github.com/pinojs/hapi-pino#readme"
 }
