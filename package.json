@@ -16,16 +16,16 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "code": "^2.2.0",
+    "code": "^4.0.0",
     "flush-write-stream": "^1.0.0",
-    "hapi": "^13.3.0",
-    "lab": "^10.3.1",
+    "hapi": "^15.2.0",
+    "lab": "^11.2.1",
     "pre-commit": "^1.1.2",
     "split2": "^2.0.1",
-    "standard": "^6.0.8"
+    "standard": "^8.5.0"
   },
   "dependencies": {
-    "pino": "^2.2.0"
+    "pino": "^3.0.0"
   },
   "repository": {
     "type": "git",
