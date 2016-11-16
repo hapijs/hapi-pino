@@ -4,6 +4,8 @@
   "description": "Hapi plugin for the Pino logger ",
   "main": "index.js",
   "scripts": {
+    "coverage": "lab test.js -c",
+    "coveralls": "lab test.js -r lcov | coveralls",
     "test": "standard && lab test.js"
   },
   "keywords": [
@@ -22,6 +24,7 @@
     "lab": "^11.2.1",
     "pre-commit": "^1.1.2",
     "split2": "^2.0.1",
+    "coveralls": "^2.11.15",
     "standard": "^8.5.0"
   },
   "dependencies": {
