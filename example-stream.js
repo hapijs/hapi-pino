@@ -1,12 +1,14 @@
 'use strict'
 
 const Hapi = require('hapi')
+const pino = require('pino')
+const PinoStream = require('./stream.js')
 
 // Create a server with a host and port
 const server = new Hapi.Server()
 server.connection({
   host: 'localhost',
-  port: 3000
+  port: process.env.PORT || 3000
 })
 
 // Add the route
@@ -21,13 +23,15 @@ server.route({
   }
 })
 
+var pretty = pino.pretty()
+
+pretty.pipe(process.stdout)
+
 server.register({
   register: require('good'),
   options: {
     reporters: {
-      myConsoleReporter: [{
-        module: 'good-console'
-      }, 'stdout']
+      pinoReporter: [new PinoStream(pino({}, process.stdout))]
     }
   }
 }, (err) => {

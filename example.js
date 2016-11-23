@@ -18,7 +18,7 @@ server.route({
     request.log(['a', 'b'], 'Request into hello world')
 
     // you can also use a pino instance, which will be faster
-    request.logger.info('In handler %s', request.path)
+    // request.logger.info('In handler %s', request.path)
 
     return reply('hello world')
   }
@@ -27,7 +27,7 @@ server.route({
 server.register({
   register: require('.').register,
   options: {
-    prettyPrint: process.env.NODE_ENV !== 'production'
+    // prettyPrint: process.env.NODE_ENV !== 'production'
   }
 }, (err) => {
   if (err) {
