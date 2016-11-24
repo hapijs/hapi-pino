@@ -14,9 +14,6 @@ server.route({
   method: 'GET',
   path: '/',
   handler: function (request, reply) {
-    // request.log is HAPI standard way of logging
-    request.log(['a', 'b'], 'Request into hello world')
-
     return reply('hello world')
   }
 })

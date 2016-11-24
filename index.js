@@ -17,16 +17,16 @@ function register (server, options, next) {
   options.serializers.res = pino.stdSerializers.res
   options.serializers.err = pino.stdSerializers.err
 
-  let logger
+  var logger
   if (options.instance) {
     options.instance.serializers = Object.assign(options.serializers, options.instance.serializers)
     logger = options.instance
   } else {
     options.stream = options.stream || process.stdout
-    let stream = options.stream || process.stdout
+    var stream = options.stream || process.stdout
 
     if (options.prettyPrint) {
-      let pretty = pino.pretty()
+      var pretty = pino.pretty()
       pretty.pipe(stream)
       stream = pretty
     }
@@ -54,16 +54,16 @@ function register (server, options, next) {
     reply.continue()
   })
 
-  server.on('log', (event) => {
+  server.on('log', function (event) {
     logEvent(logger, event)
   })
 
-  server.on('request', (request, event) => {
+  server.on('request', function (request, event) {
     logEvent(request.logger, event)
   })
 
   // log when a request completes with an error
-  server.on('request-error', (request, err) => {
+  server.on('request-error', function (request, err) {
     request.logger.warn({
       res: request.raw.res,
       err: err
@@ -71,7 +71,7 @@ function register (server, options, next) {
   })
 
   // log when a request completes
-  server.on('response', (request) => {
+  server.on('response', function (request) {
     const info = request.info
     request.logger.info({
       res: request.raw.res,
@@ -79,12 +79,12 @@ function register (server, options, next) {
     }, 'request completed')
   })
 
-  server.ext('onPostStart', (s, cb) => {
+  server.ext('onPostStart', function (s, cb) {
     logger.info(server.info, 'server started')
     cb()
   })
 
-  server.ext('onPostStop', (s, cb) => {
+  server.ext('onPostStop', function (s, cb) {
     logger.info(server.info, 'server stopped')
     cb()
   })
@@ -92,16 +92,21 @@ function register (server, options, next) {
   next()
 
   function logEvent (current, event) {
-    const tags = event.tags
-    const data = event.data
+    var tags = event.tags
+    var data = event.data
+    var level
+    var found = false
+
     for (var i = 0; i < tags.length; i++) {
-      let level = tagToLevels[tags[i]]
+      level = tagToLevels[tags[i]]
       if (level) {
         current[level]({ tags, data })
-        return
+        found = true
+        break
       }
     }
-    if (allTags) {
+
+    if (!found && allTags) {
       current[allTags]({ tags, data })
     }
   }
