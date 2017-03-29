@@ -38,7 +38,7 @@ function register (server, options, next) {
   const allTags = options.allTags || 'info'
 
   const validTags = Object.keys(tagToLevels).filter((key) => levels.indexOf(tagToLevels[key]) < 0).length === 0
-  if (!validTags || allTags && levels.indexOf(allTags) < 0) {
+  if (!validTags || (allTags && levels.indexOf(allTags) < 0)) {
     return next(new Error('invalid tag levels'))
   }
 
