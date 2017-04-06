@@ -182,6 +182,25 @@ experiment('logs each request', () => {
     })
   })
 
+  test('handles bad encoding', (done) => {
+    const server = getServer()
+    server.route({
+      path: '/',
+      method: 'GET',
+      handler: (req, reply) => reply('')
+    })
+    registerWithSink(server, 'info', (data, enc) => {
+      expect(data.data.header).equal('a;b')
+      done()
+    }, (err) => {
+      expect(err).to.be.undefined()
+      server.inject({
+        url: '/',
+        headers: { 'accept-encoding': 'a;b' }
+      })
+    })
+  })
+
   test('set the request logger', (done) => {
     const server = getServer()
     let count = 0
