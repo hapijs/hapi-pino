@@ -27,7 +27,7 @@
     "lab": "^13.0.1",
     "pre-commit": "^1.1.2",
     "split2": "^2.0.1",
-    "standard": "^9.0.2"
+    "standard": "^10.0.0"
   },
   "dependencies": {
     "pino": "^4.2.4"
