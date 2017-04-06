@@ -59,6 +59,7 @@ function register (server, options, next) {
   })
 
   server.on('request', function (request, event) {
+    request.logger = request.logger || logger.child({ req: request })
     logEvent(request.logger, event)
   })
 
