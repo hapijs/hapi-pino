@@ -16,7 +16,12 @@ server.route({
   }
 })
 
-server.register({ register: require('..'), options: { mergeHapiLogData: true } }, (err) => {
+server.register({
+  register: require('..'),
+  options: {
+    mergeHapiLogData: true
+  }
+}, (err) => {
   if (err) {
     console.error(err)
     process.exit(1)
