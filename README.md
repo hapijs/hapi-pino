@@ -95,7 +95,22 @@ events"](#hapievents) section.
   `tags`, defaults to `'info'`.
 - `[instance]` - uses a previously created Pino instance as the logger.
   The instance's `stream` and `serializers` take precedence.
+- `[mergeHapiLogData]` - When enabled, Hapi-pino will merge the data received
+  from Hapi's logging interface (`server.log(tags, data)` or `request.log(tags, data)`)
+  into Pino's logged attributes at root level. If data is a string, it will be used as
+  the value for the `msg` key. Default is `false`, in which case data will be logged under 
+  a `data` key.
 
+  E.g.
+```js
+server.log(['info'], {hello: 'world'})
+
+// with mergeHapiLogData: true
+{ level: 30, hello: 'world', ...}
+
+// with mergeHapiLogData: false (Default)
+{ level: 30, data: { hello: 'world' }}
+```
 
 <a name="serverdecorations"></a>
 ### Server Decorations

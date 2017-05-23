@@ -42,6 +42,8 @@ function register (server, options, next) {
     return next(new Error('invalid tag levels'))
   }
 
+  const mergeHapiLogData = options.mergeHapiLogData
+
   // expose logger as 'server.app.logger'
   server.app.logger = logger
 
@@ -98,17 +100,28 @@ function register (server, options, next) {
     var level
     var found = false
 
+    var logObject
+    if (mergeHapiLogData) {
+      if (typeof data === 'string') {
+        data = { msg: data }
+      }
+
+      logObject = Object.assign({ tags }, data)
+    } else {
+      logObject = { tags, data }
+    }
+
     for (var i = 0; i < tags.length; i++) {
       level = tagToLevels[tags[i]]
       if (level) {
-        current[level]({ tags, data })
+        current[level](logObject)
         found = true
         break
       }
     }
 
     if (!found && allTags) {
-      current[allTags]({ tags, data })
+      current[allTags](logObject)
     }
   }
 }

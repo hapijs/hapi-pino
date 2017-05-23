@@ -418,3 +418,47 @@ experiment('uses a prior pino instance', () => {
     })
   })
 })
+
+experiment('logging with mergeHapiLogData option enabled', () => {
+  test('log event data is merged into pino\'s log object', (done) => {
+    const server = getServer()
+    const stream = sink((data) => {
+      expect(data).to.include({ hello: 'world' })
+      done()
+    })
+    const plugin = {
+      register: Pino.register,
+      options: {
+        stream: stream,
+        level: 'info',
+        mergeHapiLogData: true
+      }
+    }
+
+    server.register(plugin, (err) => {
+      expect(err).to.be.undefined()
+      server.log(['info'], { hello: 'world' })
+    })
+  })
+
+  test('when data is string, merge it as msg property', (done) => {
+    const server = getServer()
+    const stream = sink((data) => {
+      expect(data).to.include({ msg: 'hello world' })
+      done()
+    })
+    const plugin = {
+      register: Pino.register,
+      options: {
+        stream: stream,
+        level: 'info',
+        mergeHapiLogData: true
+      }
+    }
+
+    server.register(plugin, (err) => {
+      expect(err).to.be.undefined()
+      server.log(['info'], 'hello world')
+    })
+  })
+})
