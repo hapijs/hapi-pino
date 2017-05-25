@@ -17,6 +17,10 @@ function register (server, options, next) {
   options.serializers.res = pino.stdSerializers.res
   options.serializers.err = pino.stdSerializers.err
 
+  if (options.logEvents === undefined) {
+    options.logEvents = ['server-start', 'server-stop', 'response', 'request-error']
+  }
+
   var logger
   if (options.instance) {
     options.instance.serializers = Object.assign(options.serializers, options.instance.serializers)
@@ -66,7 +70,7 @@ function register (server, options, next) {
   })
 
   // log when a request completes with an error
-  server.on('request-error', function (request, err) {
+  options.logEvents && options.logEvents.includes('request-error') && server.on('request-error', function (request, err) {
     request.logger.warn({
       res: request.raw.res,
       err: err
@@ -74,7 +78,7 @@ function register (server, options, next) {
   })
 
   // log when a request completes
-  server.on('response', function (request) {
+  options.logEvents && options.logEvents.includes('response') && server.on('response', function (request) {
     const info = request.info
     request.logger.info({
       res: request.raw.res,
@@ -82,12 +86,12 @@ function register (server, options, next) {
     }, 'request completed')
   })
 
-  server.ext('onPostStart', function (s, cb) {
+  options.logEvents && options.logEvents.includes('server-start') && server.ext('onPostStart', function (s, cb) {
     logger.info(server.info, 'server started')
     cb()
   })
 
-  server.ext('onPostStop', function (s, cb) {
+  options.logEvents && options.logEvents.includes('server-stop') && server.ext('onPostStop', function (s, cb) {
     logger.info(server.info, 'server stopped')
     cb()
   })

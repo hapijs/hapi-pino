@@ -95,6 +95,9 @@ events"](#hapievents) section.
   `tags`, defaults to `'info'`.
 - `[instance]` - uses a previously created Pino instance as the logger.
   The instance's `stream` and `serializers` take precedence.
+- `[logEvents]` - Takes an array of strings with the events to log. Default is to
+  log all events e.g. `['server-start', 'server-stop', 'response', 'request-error']`.
+  Set to `false/null` to disable all events.
 - `[mergeHapiLogData]` - When enabled, Hapi-pino will merge the data received
   from Hapi's logging interface (`server.log(tags, data)` or `request.log(tags, data)`)
   into Pino's logged attributes at root level. If data is a string, it will be used as

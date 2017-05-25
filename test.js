@@ -8,6 +8,10 @@ const writeStream = require('flush-write-stream')
 const lab = exports.lab = Lab.script()
 const experiment = lab.experiment
 const test = lab.test
+const before = lab.before
+const beforeEach = lab.beforeEach
+const after = lab.after
+const afterEach = lab.afterEach
 const expect = Code.expect
 
 const Hapi = require('hapi')
@@ -86,17 +90,33 @@ experiment('logs through the server.logger()', () => {
   })
 })
 
-test('log on server start', (done) => {
-  const server = getServer()
-  registerWithSink(server, 'info', (data, enc, cb) => {
-    expect(data).to.include(server.info)
-    expect(data.msg).to.equal('server started')
+experiment('log on server start', () => {
+  let server
+
+  before((cb) => {
+    server = getServer()
     cb()
-    done()
-  }, (err) => {
-    expect(err).to.be.undefined()
-    server.start((err) => {
+  })
+
+  after((cb) => {
+    server.stop(cb)
+  })
+
+  test('log on server start', (done) => {
+    let executed = false
+    registerWithSink(server, 'info', (data, enc, cb) => {
+      if (!executed) {
+        executed = true
+        expect(data).to.include(server.info)
+        expect(data.msg).to.equal('server started')
+        cb()
+        done()
+      }
+    }, (err) => {
       expect(err).to.be.undefined()
+      server.start((err) => {
+        expect(err).to.be.undefined()
+      })
     })
   })
 })
@@ -362,6 +382,125 @@ experiment('logs through request.log', () => {
     server.register(plugin, (err) => {
       expect(err).to.be.undefined()
       server.log(['debug'], 'hello world')
+    })
+  })
+})
+
+experiment('disables log events', () => {
+  let server
+
+  beforeEach((cb) => {
+    server = getServer()
+    cb()
+  })
+
+  afterEach((cb) => {
+    server.stop()
+    cb()
+  })
+
+  test('server-start', (done) => {
+    let called = false
+    const stream = sink(() => {
+      called = true
+    })
+
+    const plugin = {
+      register: Pino.register,
+      options: {
+        stream: stream,
+        level: 'info',
+        logEvents: false
+      }
+    }
+
+    server.register(plugin, (err) => {
+      expect(err).to.be.undefined()
+      server.start((err) => {
+        expect(err).to.be.undefined()
+        expect(called).to.be.false()
+        done()
+      })
+    })
+  })
+
+  test('server-stop', (done) => {
+    let called = false
+    const stream = sink(() => {
+      called = true
+    })
+
+    const plugin = {
+      register: Pino.register,
+      options: {
+        stream: stream,
+        level: 'info',
+        logEvents: false
+      }
+    }
+
+    server.register(plugin, (err) => {
+      expect(err).to.be.undefined()
+      server.stop((err) => {
+        expect(err).to.be.undefined()
+        expect(called).to.be.false()
+        done()
+      })
+    })
+  })
+
+  test('response', (done) => {
+    let called = false
+    const stream = sink(() => {
+      called = true
+    })
+
+    const plugin = {
+      register: Pino.register,
+      options: {
+        stream: stream,
+        level: 'info',
+        logEvents: false
+      }
+    }
+
+    server.register(plugin, (err) => {
+      expect(err).to.be.undefined()
+      server.inject('/', (res) => {
+        expect(called).to.be.false()
+        done()
+      })
+    })
+  })
+
+  test('request-error', (done) => {
+    let called = false
+    const stream = sink(() => {
+      called = true
+    })
+
+    const plugin = {
+      register: Pino.register,
+      options: {
+        stream: stream,
+        level: 'info',
+        logEvents: false
+      }
+    }
+
+    server.register(plugin, (err) => {
+      expect(err).to.be.undefined()
+      server.route({
+        method: 'GET',
+        path: '/',
+        handler: (request, reply) => {
+          return reply(new Error('boom'))
+        }
+      })
+      server.inject('/', (res) => {
+        expect(called).to.be.false()
+        done()
+      })
     })
   })
 })
