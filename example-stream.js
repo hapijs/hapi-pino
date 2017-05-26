@@ -1,12 +1,14 @@
 'use strict'
 
 const Hapi = require('hapi')
+const pino = require('pino')
+const PinoStream = require('./stream.js')
 
 // Create a server with a host and port
 const server = new Hapi.Server()
 server.connection({
   host: 'localhost',
-  port: 3000
+  port: process.env.PORT || 3000
 })
 
 // Add the route
@@ -17,29 +19,26 @@ server.route({
     // request.log is HAPI standard way of logging
     request.log(['a', 'b'], 'Request into hello world')
 
-    // you can also use a pino instance, which will be faster
-    // request.logger.info('In handler %s', request.path)
-
     return reply('hello world')
   }
 })
 
+var pretty = pino.pretty()
+
+pretty.pipe(process.stdout)
+
 server.register({
-  register: require('.').register,
+  register: require('good'),
   options: {
-    // prettyPrint: process.env.NODE_ENV !== 'production'
+    reporters: {
+      pinoReporter: [new PinoStream(pino({}, process.stdout))]
+    }
   }
 }, (err) => {
   if (err) {
     console.error(err)
     process.exit(1)
   }
-
-  // the logger is available in server.app
-  server.app.logger.warn('Pino is registered')
-
-  // also as a decorated API
-  server.logger().info('another way for accessing it')
 
   // and through Hapi standard logging system
   server.log(['subsystem'], 'third way for accessing it')
