@@ -20,6 +20,12 @@ const Pino = require('.')
 function getServer () {
   const server = new Hapi.Server()
   server.connection({ port: 3000 })
+  server.route({
+    method: 'POST',
+    path: '/',
+    handler: (request, reply) => reply('ok')
+  })
+
   return server
 }
 
@@ -598,6 +604,37 @@ experiment('logging with mergeHapiLogData option enabled', () => {
     server.register(plugin, (err) => {
       expect(err).to.be.undefined()
       server.log(['info'], 'hello world')
+    })
+  })
+})
+
+experiment('logging with overridden serializer', () => {
+  test('with pre-defined req serializer', (done) => {
+    const server = getServer()
+    const stream = sink((data) => {
+      expect(data.req.payload).to.equal({ foo: 42 })
+      done()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      register: Pino.register,
+      options: {
+        instance: logger,
+        serializers: {
+          req: (req) => ({ payload: req.payload })
+        }
+      }
+    }
+
+    server.register(plugin, (err) => {
+      expect(err).to.be.undefined()
+      server.inject({
+        method: 'POST',
+        url: '/',
+        payload: {
+          foo: 42
+        }
+      })
     })
   })
 })
