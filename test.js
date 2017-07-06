@@ -20,11 +20,18 @@ const Pino = require('.')
 function getServer () {
   const server = new Hapi.Server()
   server.connection({ port: 3000 })
-  server.route({
-    method: 'POST',
-    path: '/',
-    handler: (request, reply) => reply('ok')
-  })
+  server.route([
+    {
+      method: 'POST',
+      path: '/',
+      handler: (request, reply) => reply('ok')
+    },
+    {
+      method: 'GET',
+      path: '/error',
+      handler: (request, reply) => reply(new Error('foobar'))
+    }
+  ])
 
   return server
 }
@@ -634,6 +641,61 @@ experiment('logging with overridden serializer', () => {
         payload: {
           foo: 42
         }
+      })
+    })
+  })
+
+  test('with pre-defined res serializer', (done) => {
+    const server = getServer()
+    const stream = sink((data) => {
+      expect(data.res.code).to.equal(200)
+      done()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      register: Pino.register,
+      options: {
+        instance: logger,
+        serializers: {
+          res: (res) => ({ code: res.statusCode })
+        }
+      }
+    }
+
+    server.register(plugin, (err) => {
+      expect(err).to.be.undefined()
+      server.inject({
+        method: 'POST',
+        url: '/',
+        payload: {
+          foo: 42
+        }
+      })
+    })
+  })
+
+  test('with pre-defined err serializer', (done) => {
+    const server = getServer()
+    const stream = sink((data) => {
+      expect(data.err.errStack).to.not.be.undefined()
+      done()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      register: Pino.register,
+      options: {
+        instance: logger,
+        serializers: {
+          err: (err) => ({ errStack: err.stack })
+        }
+      }
+    }
+
+    server.register(plugin, (err) => {
+      expect(err).to.be.undefined()
+      server.inject({
+        method: 'GET',
+        url: '/error'
       })
     })
   })
