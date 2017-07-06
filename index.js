@@ -13,9 +13,9 @@ module.exports.levelTags = {
 
 function register (server, options, next) {
   options.serializers = options.serializers || {}
-  options.serializers.req = asReqValue
-  options.serializers.res = pino.stdSerializers.res
-  options.serializers.err = pino.stdSerializers.err
+  options.serializers.req = options.serializers.req || asReqValue
+  options.serializers.res = options.serializers.res || pino.stdSerializers.res
+  options.serializers.err = options.serializers.err || pino.stdSerializers.err
 
   if (options.logEvents === undefined) {
     options.logEvents = ['onPostStart', 'onPostStop', 'response', 'request-error']
@@ -81,6 +81,7 @@ function register (server, options, next) {
   tryAddEvent(server, options, 'on', 'response', function (request) {
     const info = request.info
     request.logger.info({
+      payload: options.logPayload ? request.payload : undefined,
       res: request.raw.res,
       responseTime: info.responded - info.received
     }, 'request completed')
