@@ -619,7 +619,7 @@ experiment('logging with overridden serializer', () => {
   test('with pre-defined req serializer', (done) => {
     const server = getServer()
     const stream = sink((data) => {
-      expect(data.req.payload).to.equal({ foo: 42 })
+      expect(data.req.uri).to.equal('/')
       done()
     })
     const logger = require('pino')(stream)
@@ -628,7 +628,7 @@ experiment('logging with overridden serializer', () => {
       options: {
         instance: logger,
         serializers: {
-          req: (req) => ({ payload: req.payload })
+          req: (req) => ({ uri: req.raw.req.url })
         }
       }
     }
@@ -636,11 +636,8 @@ experiment('logging with overridden serializer', () => {
     server.register(plugin, (err) => {
       expect(err).to.be.undefined()
       server.inject({
-        method: 'POST',
-        url: '/',
-        payload: {
-          foo: 42
-        }
+        method: 'GET',
+        url: '/'
       })
     })
   })
@@ -648,7 +645,7 @@ experiment('logging with overridden serializer', () => {
   test('with pre-defined res serializer', (done) => {
     const server = getServer()
     const stream = sink((data) => {
-      expect(data.res.code).to.equal(200)
+      expect(data.res.code).to.equal(404)
       done()
     })
     const logger = require('pino')(stream)
@@ -665,11 +662,8 @@ experiment('logging with overridden serializer', () => {
     server.register(plugin, (err) => {
       expect(err).to.be.undefined()
       server.inject({
-        method: 'POST',
-        url: '/',
-        payload: {
-          foo: 42
-        }
+        method: 'GET',
+        url: '/'
       })
     })
   })
@@ -696,6 +690,35 @@ experiment('logging with overridden serializer', () => {
       server.inject({
         method: 'GET',
         url: '/error'
+      })
+    })
+  })
+})
+
+experiment('logging with request payload', () => {
+  test('with pre-defined req serializer', (done) => {
+    const server = getServer()
+    const stream = sink((data) => {
+      expect(data.payload).to.equal({ foo: 42 })
+      done()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      register: Pino.register,
+      options: {
+        instance: logger,
+        logPayload: true
+      }
+    }
+
+    server.register(plugin, (err) => {
+      expect(err).to.be.undefined()
+      server.inject({
+        method: 'POST',
+        url: '/',
+        payload: {
+          foo: 42
+        }
       })
     })
   })

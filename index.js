@@ -60,11 +60,6 @@ function register (server, options, next) {
     reply.continue()
   })
 
-  server.ext('onPreHandler', (request, reply) => {
-    request.logger = (request.logger || logger).child({ req: request })
-    reply.continue()
-  })
-
   server.on('log', function (event) {
     logEvent(logger, event)
   })
@@ -86,6 +81,7 @@ function register (server, options, next) {
   tryAddEvent(server, options, 'on', 'response', function (request) {
     const info = request.info
     request.logger.info({
+      payload: options.logPayload ? request.payload : undefined,
       res: request.raw.res,
       responseTime: info.responded - info.received
     }, 'request completed')
