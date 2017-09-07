@@ -50,10 +50,7 @@ server.register(require('hapi-pino'), (err) => {
     process.exit(1)
   }
 
-  // the logger is available in server.app
-  server.app.logger.warn('Pino is registered')
-
-  // also as a decorated API
+  // The logger is available as a decorated API
   server.logger().info('another way for accessing it')
 
   // and through Hapi standard logging system

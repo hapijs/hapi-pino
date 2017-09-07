@@ -81,14 +81,12 @@ function ltest (func) {
   })
 }
 
-experiment('logs through the server.app.logger', () => {
-  ltest((level, done) => {
-    const server = getServer()
-    registerWithSink(server, level, onHelloWorld, (err) => {
-      expect(err).to.be.undefined()
-      server.app.logger[level]('hello world')
-      done()
-    })
+test('server.app.logger is undefined', (done) => {
+  const server = getServer()
+  registerWithSink(server, 'info', () => done(new Error('fail')), (err) => {
+    expect(err).to.be.undefined()
+    expect(server.app.logger).to.be.undefined()
+    done()
   })
 })
 
@@ -566,7 +564,7 @@ experiment('uses a prior pino instance', () => {
 
     server.register(plugin, (err) => {
       expect(err).to.be.undefined()
-      server.app.logger.info({foo: 'bar'}, 'hello world')
+      server.logger().info({foo: 'bar'}, 'hello world')
     })
   })
 })
