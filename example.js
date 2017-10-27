@@ -1,5 +1,7 @@
 'use strict'
 
+require('make-promises-safe')
+
 const Hapi = require('hapi')
 
 async function start () {
