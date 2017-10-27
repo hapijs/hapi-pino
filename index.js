@@ -48,9 +48,6 @@ async function register (server, options, nex) {
 
   const mergeHapiLogData = options.mergeHapiLogData
 
-  // expose logger as 'server.app.logger'
-  server.app.logger = logger
-
   // expose logger as 'server.logger()'
   server.decorate('server', 'logger', () => logger)
 
