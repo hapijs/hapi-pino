@@ -119,12 +119,6 @@ async function register (server, options, nex) {
       logObject = { tags, data }
     }
 
-    if (event.error) {
-      logObject.err = event.error
-      current.error(logObject)
-      return
-    }
-
     for (var i = 0; i < tags.length; i++) {
       level = tagToLevels[tags[i]]
       if (level) {
