@@ -2,38 +2,34 @@
 
 const Hapi = require('hapi')
 
-// Create a server with a host and port
-const server = new Hapi.Server()
-server.connection({
-  host: 'localhost',
-  port: 3000
-})
+async function start () {
+  // Create a server with a host and port
+  const server = Hapi.server({
+    host: 'localhost',
+    port: 3000
+  })
 
-// Add the route
-server.route({
-  method: 'GET',
-  path: '/',
-  handler: function (request, reply) {
-    // request.log is HAPI standard way of logging
-    request.log(['a', 'b'], 'Request into hello world')
+  // Add the route
+  server.route({
+    method: 'GET',
+    path: '/',
+    handler: async function (request, h) {
+      // request.log is HAPI standard way of logging
+      request.log(['a', 'b'], 'Request into hello world')
 
-    // you can also use a pino instance, which will be faster
-    request.logger.info('In handler %s', request.path)
+      // you can also use a pino instance, which will be faster
+      request.logger.info('In handler %s', request.path)
 
-    return reply('hello world')
-  }
-})
+      return 'hello world'
+    }
+  })
 
-server.register({
-  register: require('.').register,
-  options: {
-    prettyPrint: process.env.NODE_ENV !== 'production'
-  }
-}, (err) => {
-  if (err) {
-    console.error(err)
-    process.exit(1)
-  }
+  await server.register({
+    plugin: require('.'),
+    options: {
+      prettyPrint: process.env.NODE_ENV !== 'production'
+    }
+  })
 
   // the logger is available in server.app
   server.app.logger.warn('Pino is registered')
@@ -44,11 +40,12 @@ server.register({
   // and through Hapi standard logging system
   server.log(['subsystem'], 'third way for accessing it')
 
-  // Start the server
-  server.start((err) => {
-    if (err) {
-      console.error(err)
-      process.exit(1)
-    }
-  })
+  await server.start()
+
+  return server
+}
+
+start().catch((err) => {
+  console.log(err)
+  process.exit(1)
 })
