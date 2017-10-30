@@ -11,7 +11,7 @@ const levelTags = {
   error: 'error'
 }
 
-async function register (server, options, nex) {
+async function register (server, options) {
   options.serializers = options.serializers || {}
   options.serializers.req = options.serializers.req || asReqValue
   options.serializers.res = options.serializers.res || pino.stdSerializers.res
@@ -57,7 +57,7 @@ async function register (server, options, nex) {
     return h.continue
   })
 
-  server.events.on('log', function (event, tags) {
+  server.events.on('log', function (event) {
     logEvent(logger, event)
   })
 
@@ -85,7 +85,7 @@ async function register (server, options, nex) {
     logger.info(server.info, 'server started')
   })
 
-  tryAddEvent(server, options, 'ext', 'onPostStop', async function (s, cb) {
+  tryAddEvent(server, options, 'ext', 'onPostStop', async function (s) {
     logger.info(server.info, 'server stopped')
   })
 
