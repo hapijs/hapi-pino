@@ -63,11 +63,17 @@ async function register (server, options) {
 
   // log when a request completes with an error
   tryAddEvent(server, options, 'on', 'request', function (request, event, tags) {
-    if (tags.error && (tags.internal || tags['accept-encoding'])) {
-      request.logger = request.logger || logger.child({ req: request })
+    if (event.channel === 'internal' && !tags['accept-encoding']) {
+      return
+    }
+
+    request.logger = request.logger || logger.child({ req: request })
+    if (event.error) {
       request.logger.warn({
         err: event.error
       }, 'request error')
+    } else {
+      logEvent(request.logger, event)
     }
   })
 

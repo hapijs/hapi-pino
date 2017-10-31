@@ -23,6 +23,11 @@ function getServer () {
   const server = Hapi.server({ autoListen: false })
   server.route([
     {
+      method: 'GET',
+      path: '/something',
+      handler: async (request, h) => 'ok'
+    },
+    {
       method: 'POST',
       path: '/',
       handler: async (request, h) => 'ok'
@@ -136,12 +141,12 @@ experiment('logs each request', () => {
     const server = getServer()
     registerWithSink(server, 'info', (data) => {
       expect(data.req.id).to.exists()
-      expect(data.res.statusCode).to.equal(404)
+      expect(data.res.statusCode).to.equal(200)
       expect(data.msg).to.equal('request completed')
       expect(data.responseTime).to.be.at.least(0)
       done()
     }).then(() => {
-      return server.inject('/')
+      return server.inject('/something')
     }).catch(done)
   })
 
@@ -355,28 +360,34 @@ experiment('logs through server.log', () => {
 })
 
 experiment('logs through request.log', () => {
-  ltest((level, done) => {
+  ltest(async (level) => {
     const server = getServer()
     server.route({
       path: '/',
       method: 'GET',
-      handler: (req, reply) => {
+      handler: (req, h) => {
         req.log(['aaa'], 'hello logger')
-        reply('hello world')
+        return 'hello world'
       }
     })
-    tagsWithSink(server, {
+
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+
+    await tagsWithSink(server, {
       aaa: level
     }, (data, enc, cb) => {
       if (data.tags) {
         expect(data.data).to.equal('hello logger')
-        done()
+        resolver()
       }
       cb()
-    }, (err) => {
-      expect(err).to.be.undefined()
-      server.inject('/')
     })
+
+    await server.inject('/')
+    await done
   })
 
   test('uses default tag mapping', (done) => {
