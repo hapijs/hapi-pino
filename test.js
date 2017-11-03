@@ -131,27 +131,40 @@ experiment('log on server start', () => {
     })
 
     await server.start()
-
     await done
   })
 })
 
 experiment('logs each request', () => {
-  test('at default level', (done) => {
+  test('at default level', async () => {
     const server = getServer()
-    registerWithSink(server, 'info', (data) => {
+    let done
+
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    await registerWithSink(server, 'info', (data) => {
       expect(data.req.id).to.exists()
       expect(data.res.statusCode).to.equal(200)
       expect(data.msg).to.equal('request completed')
       expect(data.responseTime).to.be.at.least(0)
       done()
-    }).then(() => {
-      return server.inject('/something')
-    }).catch(done)
+    })
+
+    await server.inject('/something')
+
+    await finish
   })
 
-  test('track responseTime', (done) => {
+  test('track responseTime', async () => {
     const server = getServer()
+
+    let done
+
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
 
     server.route({
       path: '/',
@@ -162,42 +175,53 @@ experiment('logs each request', () => {
       }
     })
 
-    registerWithSink(server, 'info', (data) => {
+    await registerWithSink(server, 'info', (data) => {
       expect(data.res.statusCode).to.equal(200)
       expect(data.msg).to.equal('request completed')
       expect(data.responseTime).to.be.at.least(10)
       done()
-    }).then(() => {
-      server.inject('/')
-    }).catch(done)
+    })
+
+    await server.inject('/')
+    await finish
   })
 
-  test('correctly set the status code', (done) => {
+  test('correctly set the status code', async () => {
     const server = getServer()
+
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
     server.route({
       path: '/',
       method: 'GET',
       handler: (req, h) => 'hello world'
     })
-    registerWithSink(server, 'info', (data, enc, cb) => {
+    await registerWithSink(server, 'info', (data, enc, cb) => {
       expect(data.res.statusCode).to.equal(200)
       expect(data.msg).to.equal('request completed')
       cb()
       done()
-    }).then(() => {
-      server.inject('/')
-    }).catch(done)
+    })
+    await server.inject('/')
+    await finish
   })
 
-  test('handles 500s', (done) => {
+  test('handles 500s', async () => {
     const server = getServer()
     let count = 0
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     server.route({
       path: '/',
       method: 'GET',
       handler: (req, reply) => { throw new Error('boom') }
     })
-    registerWithSink(server, 'info', (data, enc, cb) => {
+    await registerWithSink(server, 'info', (data, enc, cb) => {
       if (count === 0) {
         expect(data.err.message).to.equal('boom')
         expect(data.level).to.equal(40)
@@ -210,32 +234,40 @@ experiment('logs each request', () => {
       }
       count++
       cb()
-    }).then(() => {
-      server.inject('/')
-    }).catch(done)
+    })
+    await server.inject('/')
+    await finish
   })
 
-  test('handles bad encoding', (done) => {
+  test('handles bad encoding', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     server.route({
       path: '/',
       method: 'GET',
       handler: (req, h) => ''
     })
-    registerWithSink(server, 'info', (data, enc) => {
+    await registerWithSink(server, 'info', (data, enc) => {
       expect(data.err.header).equal('a;b')
       done()
-    }).then(() => {
-      server.inject({
-        url: '/',
-        headers: { 'accept-encoding': 'a;b' }
-      })
-    }).catch(done)
+    })
+    await server.inject({
+      url: '/',
+      headers: { 'accept-encoding': 'a;b' }
+    })
+    await finish
   })
 
-  test('set the request logger', (done) => {
+  test('set the request logger', async () => {
     const server = getServer()
     let count = 0
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     server.route({
       path: '/',
       method: 'GET',
@@ -244,7 +276,7 @@ experiment('logs each request', () => {
         return 'hello world'
       }
     })
-    registerWithSink(server, 'info', (data, enc, cb) => {
+    await registerWithSink(server, 'info', (data, enc, cb) => {
       if (count === 0) {
         expect(data.msg).to.equal('hello logger')
       } else {
@@ -254,9 +286,9 @@ experiment('logs each request', () => {
       }
       count++
       cb()
-    }).then(() => {
-      server.inject('/')
-    }).catch(done)
+    })
+    await server.inject('/')
+    await finish
   })
 })
 
@@ -318,8 +350,12 @@ experiment('logs through server.log', () => {
     throw new Error('expected error')
   })
 
-  test('with tag catchall', (done) => {
+  test('with tag catchall', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data.data).to.equal('hello world')
       expect(data.level).to.equal(20)
@@ -334,13 +370,17 @@ experiment('logs through server.log', () => {
       }
     }
 
-    server.register(plugin).then(() => {
-      server.log(['something'], 'hello world')
-    })
+    await server.register(plugin)
+    server.log(['something'], 'hello world')
+    await finish
   })
 
-  test('default tag catchall', (done) => {
+  test('default tag catchall', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data.data).to.equal('hello world')
       expect(data.level).to.equal(30)
@@ -353,9 +393,9 @@ experiment('logs through server.log', () => {
       }
     }
 
-    server.register(plugin).then(() => {
-      server.log(['something'], 'hello world')
-    })
+    await server.register(plugin)
+    server.log(['something'], 'hello world')
+    await finish
   })
 })
 
@@ -390,8 +430,12 @@ experiment('logs through request.log', () => {
     await done
   })
 
-  test('uses default tag mapping', (done) => {
+  test('uses default tag mapping', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data.data).to.equal('hello world')
       expect(data.level).to.equal(20)
@@ -405,25 +449,23 @@ experiment('logs through request.log', () => {
       }
     }
 
-    server.register(plugin).then(() => {
-      server.log(['debug'], 'hello world')
-    })
+    await server.register(plugin)
+    server.log(['debug'], 'hello world')
+    await finish
   })
 })
 
 experiment('disables log events', () => {
   let server
 
-  beforeEach((cb) => {
+  beforeEach(() => {
     server = Hapi.server({ port: 0 })
-    cb()
   })
 
-  afterEach((cb) => {
+  afterEach(async () => {
     if (server) {
-      server.stop()
+      await server.stop()
     }
-    cb()
   })
 
   test('server-start', async () => {
@@ -487,7 +529,7 @@ experiment('disables log events', () => {
     expect(called).to.be.false()
   })
 
-  test('request-error', (done) => {
+  test('request-error', async () => {
     let called = false
     const stream = sink(() => {
       called = true
@@ -502,25 +544,27 @@ experiment('disables log events', () => {
       }
     }
 
-    server.register(plugin).then(() => {
-      server.route({
-        method: 'GET',
-        path: '/',
-        handler: (request, h) => {
-          return new Error('boom')
-        }
-      })
+    await server.register(plugin)
+    server.route({
+      method: 'GET',
+      path: '/',
+      handler: (request, h) => {
+        return new Error('boom')
+      }
+    })
 
-      return server.inject('/').then(() => {
-        expect(called).to.be.false()
-      })
-    }).then(done).catch(done)
+    await server.inject('/')
+    expect(called).to.be.false()
   })
 })
 
 experiment('uses a prior pino instance', () => {
-  test('without pre-defined serializers', (done) => {
+  test('without pre-defined serializers', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data.data).to.equal('hello world')
       expect(data.level).to.equal(30)
@@ -534,13 +578,17 @@ experiment('uses a prior pino instance', () => {
       }
     }
 
-    server.register(plugin).then(() => {
-      server.log(['something'], 'hello world')
-    }).catch(done)
+    await server.register(plugin)
+    server.log(['something'], 'hello world')
+    await finish
   })
 
-  test('with pre-defined serializers', (done) => {
+  test('with pre-defined serializers', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data.msg).to.equal('hello world')
       expect(data.foo).to.exist()
@@ -563,15 +611,19 @@ experiment('uses a prior pino instance', () => {
       }
     }
 
-    server.register(plugin).then(() => {
-      server.logger().info({foo: 'bar'}, 'hello world')
-    }).catch(done)
+    await server.register(plugin)
+    server.logger().info({foo: 'bar'}, 'hello world')
+    await finish
   })
 })
 
 experiment('logging with mergeHapiLogData option enabled', () => {
-  test('log event data is merged into pino\'s log object', (done) => {
+  test('log event data is merged into pino\'s log object', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data).to.include({ hello: 'world' })
       done()
@@ -585,13 +637,17 @@ experiment('logging with mergeHapiLogData option enabled', () => {
       }
     }
 
-    server.register(plugin).then(() => {
-      server.log(['info'], { hello: 'world' })
-    }).catch(done)
+    await server.register(plugin)
+    server.log(['info'], { hello: 'world' })
+    await finish
   })
 
-  test('when data is string, merge it as msg property', (done) => {
+  test('when data is string, merge it as msg property', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data).to.include({ msg: 'hello world' })
       done()
@@ -605,15 +661,19 @@ experiment('logging with mergeHapiLogData option enabled', () => {
       }
     }
 
-    server.register(plugin).then(() => {
-      server.log(['info'], 'hello world')
-    }).catch(done)
+    await server.register(plugin)
+    server.log(['info'], 'hello world')
+    await finish
   })
 })
 
 experiment('logging with overridden serializer', () => {
-  test('with pre-defined req serializer', (done) => {
+  test('with pre-defined req serializer', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data.req.uri).to.equal('/')
       done()
@@ -629,16 +689,20 @@ experiment('logging with overridden serializer', () => {
       }
     }
 
-    server.register(plugin).then(() => {
-      server.inject({
-        method: 'GET',
-        url: '/'
-      })
-    }).catch(done)
+    await server.register(plugin)
+    await server.inject({
+      method: 'GET',
+      url: '/'
+    })
+    await finish
   })
 
-  test('with pre-defined res serializer', (done) => {
+  test('with pre-defined res serializer', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data.res.code).to.equal(404)
       done()
@@ -654,16 +718,20 @@ experiment('logging with overridden serializer', () => {
       }
     }
 
-    server.register(plugin).then(() => {
-      server.inject({
-        method: 'GET',
-        url: '/'
-      })
-    }).catch(done)
+    await server.register(plugin)
+    await server.inject({
+      method: 'GET',
+      url: '/'
+    })
+    await finish
   })
 
-  test('with pre-defined err serializer', (done) => {
+  test('with pre-defined err serializer', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data.err.errStack).to.not.be.undefined()
       done()
@@ -679,12 +747,12 @@ experiment('logging with overridden serializer', () => {
       }
     }
 
-    server.register(plugin).then(() => {
-      server.inject({
-        method: 'GET',
-        url: '/error'
-      })
-    }).catch(done)
+    await server.register(plugin)
+    await server.inject({
+      method: 'GET',
+      url: '/error'
+    })
+    await finish
   })
 })
 
