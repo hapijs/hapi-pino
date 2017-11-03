@@ -18,10 +18,10 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "code": "^5.1.0",
+    "code": "^5.1.2",
     "coveralls": "^3.0.0",
     "flush-write-stream": "^1.0.0",
-    "hapi": "^17.0.0-rc9",
+    "hapi": "^17.0.0-rc10",
     "lab": "^14.3.1",
     "make-promises-safe": "^1.1.0",
     "pre-commit": "^1.1.2",
@@ -29,7 +29,7 @@
     "standard": "^10.0.3"
   },
   "dependencies": {
-    "pino": "^4.8.1"
+    "pino": "^4.9.0"
   },
   "repository": {
     "type": "git",
