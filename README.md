@@ -9,10 +9,12 @@ mode](https://github.com/pinojs/pino#extreme). Using hapi-pino in
 extreme mode allows the "hello world" example to handle 30% more
 throughput than good.
 
+__hapi-pino__ v2.x.x supports Hapi v16.
+
 ## Install
 
 ```
-npm i hapi-pino --save
+npm i hapi-pino@2 --save
 ```
 
 ## Usage
