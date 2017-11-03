@@ -1,40 +1,32 @@
 'use strict'
 
+require('make-promises-safe')
+
 const Hapi = require('hapi')
 
-const server = new Hapi.Server()
-server.connection({
-  host: 'localhost',
-  port: 3000
-})
+async function start () {
+  const server = Hapi.server({ port: 3000 })
 
-server.route({
-  method: 'GET',
-  path: '/',
-  handler: function (request, reply) {
-    return reply('hello world')
-  }
-})
+  server.route({
+    method: 'GET',
+    path: '/',
+    handler: async function (request, h) {
+      return 'hello world'
+    }
+  })
 
-server.register({
-  register: require('..'),
-  options: {
-    mergeHapiLogData: true
-  }
-}, (err) => {
-  if (err) {
-    console.error(err)
-    process.exit(1)
-  }
+  await server.register({
+    plugin: require('..'),
+    options: {
+      mergeHapiLogData: true
+    }
+  })
 
-  server.on('response', () => {
+  server.events.on('response', () => {
     server.log(['info'], { hello: 'world' })
   })
 
-  server.start((err) => {
-    if (err) {
-      console.error(err)
-      process.exit(1)
-    }
-  })
-})
+  await server.start()
+}
+
+start()

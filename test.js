@@ -4,6 +4,8 @@ const Code = require('code')
 const Lab = require('lab')
 const split = require('split2')
 const writeStream = require('flush-write-stream')
+const promisify = require('util').promisify
+const sleep = promisify(setTimeout)
 
 const lab = exports.lab = Lab.script()
 const experiment = lab.experiment
@@ -18,18 +20,22 @@ const Hapi = require('hapi')
 const Pino = require('.')
 
 function getServer () {
-  const server = new Hapi.Server()
-  server.connection({ port: 3000 })
+  const server = Hapi.server({ autoListen: false })
   server.route([
+    {
+      method: 'GET',
+      path: '/something',
+      handler: async (request, h) => 'ok'
+    },
     {
       method: 'POST',
       path: '/',
-      handler: (request, reply) => reply('ok')
+      handler: async (request, h) => 'ok'
     },
     {
       method: 'GET',
       path: '/error',
-      handler: (request, reply) => reply(new Error('foobar'))
+      handler: async (request, h) => { throw new Error('foobar') }
     }
   ])
 
@@ -42,23 +48,23 @@ function sink (func) {
   return result
 }
 
-function registerWithSink (server, level, func, registered) {
+async function registerWithSink (server, level, func) {
   const stream = sink(func)
   const plugin = {
-    register: Pino.register,
+    plugin: Pino,
     options: {
       stream: stream,
       level: level
     }
   }
 
-  server.register(plugin, registered)
+  await server.register(plugin)
 }
 
-function tagsWithSink (server, tags, func, registered) {
+async function tagsWithSink (server, tags, func) {
   const stream = sink(func)
   const plugin = {
-    register: Pino.register,
+    plugin: Pino,
     options: {
       stream: stream,
       level: 'trace',
@@ -66,7 +72,7 @@ function tagsWithSink (server, tags, func, registered) {
     }
   }
 
-  server.register(plugin, registered)
+  await server.register(plugin)
 }
 
 function onHelloWorld (data) {
@@ -75,126 +81,147 @@ function onHelloWorld (data) {
 
 function ltest (func) {
   ;['trace', 'debug', 'info', 'warn', 'error'].forEach((level) => {
-    test(`at ${level}`, (done) => {
-      func(level, done)
+    test(`at ${level}`, async () => {
+      await func(level)
     })
   })
 }
 
-test('server.app.logger is undefined', (done) => {
+test('server.app.logger is undefined', async () => {
   const server = getServer()
-  registerWithSink(server, 'info', () => done(new Error('fail')), (err) => {
-    expect(err).to.be.undefined()
-    expect(server.app.logger).to.be.undefined()
-    done()
-  })
+  await registerWithSink(server, 'info', () => { throw new Error('fail') })
+  expect(server.app.logger).to.be.undefined()
 })
 
 experiment('logs through the server.logger()', () => {
-  ltest((level, done) => {
+  ltest(async (level) => {
     const server = getServer()
-    registerWithSink(server, level, onHelloWorld, (err) => {
-      expect(err).to.be.undefined()
-      server.logger()[level]('hello world')
-      done()
-    })
+    await registerWithSink(server, level, onHelloWorld)
+    server.logger()[level]('hello world')
   })
 })
 
 experiment('log on server start', () => {
   let server
 
-  before((cb) => {
-    server = getServer()
-    cb()
+  before(async () => {
+    server = Hapi.server({ port: 0 })
   })
 
-  after((cb) => {
-    server.stop(cb)
+  after(async () => {
+    await server.stop()
   })
 
-  test('log on server start', (done) => {
+  test('log on server start', async () => {
     let executed = false
-    registerWithSink(server, 'info', (data, enc, cb) => {
+    let finish
+
+    const done = new Promise(function (resolve, reject) {
+      finish = resolve
+    })
+
+    await registerWithSink(server, 'info', (data, enc, cb) => {
       if (!executed) {
         executed = true
         expect(data).to.include(server.info)
         expect(data.msg).to.equal('server started')
         cb()
-        done()
+        finish()
       }
-    }, (err) => {
-      expect(err).to.be.undefined()
-      server.start((err) => {
-        expect(err).to.be.undefined()
-      })
     })
+
+    await server.start()
+    await done
   })
 })
 
 experiment('logs each request', () => {
-  test('at default level', (done) => {
+  test('at default level', async () => {
     const server = getServer()
-    registerWithSink(server, 'info', (data) => {
-      expect(data.res.statusCode).to.equal(404)
-      expect(data.req.id).to.exist()
+    let done
+
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    await registerWithSink(server, 'info', (data) => {
+      expect(data.req.id).to.exists()
+      expect(data.res.statusCode).to.equal(200)
       expect(data.msg).to.equal('request completed')
       expect(data.responseTime).to.be.at.least(0)
       done()
-    }, (err) => {
-      expect(err).to.be.undefined()
-      server.inject('/')
     })
+
+    await server.inject('/something')
+
+    await finish
   })
 
-  test('track responseTime', (done) => {
+  test('track responseTime', async () => {
     const server = getServer()
+
+    let done
+
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
     server.route({
       path: '/',
       method: 'GET',
-      handler: (req, reply) => setTimeout(reply, 10, 'hello world')
+      handler: async (req, h) => {
+        await sleep(10)
+        return 'hello world'
+      }
     })
-    registerWithSink(server, 'info', (data) => {
+
+    await registerWithSink(server, 'info', (data) => {
       expect(data.res.statusCode).to.equal(200)
-      expect(data.req.id).to.exist()
       expect(data.msg).to.equal('request completed')
       expect(data.responseTime).to.be.at.least(10)
       done()
-    }, (err) => {
-      expect(err).to.be.undefined()
-      server.inject('/')
     })
+
+    await server.inject('/')
+    await finish
   })
 
-  test('correctly set the status code', (done) => {
+  test('correctly set the status code', async () => {
     const server = getServer()
+
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
     server.route({
       path: '/',
       method: 'GET',
-      handler: (req, reply) => reply('hello world')
+      handler: (req, h) => 'hello world'
     })
-    registerWithSink(server, 'info', (data, enc, cb) => {
-      expect(data.req.id).to.exist()
+    await registerWithSink(server, 'info', (data, enc, cb) => {
       expect(data.res.statusCode).to.equal(200)
       expect(data.msg).to.equal('request completed')
       cb()
       done()
-    }, (err) => {
-      expect(err).to.be.undefined()
-      server.inject('/')
     })
+    await server.inject('/')
+    await finish
   })
 
-  test('handles 500s', (done) => {
+  test('handles 500s', async () => {
     const server = getServer()
     let count = 0
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     server.route({
       path: '/',
       method: 'GET',
-      handler: (req, reply) => reply(new Error('boom'))
+      handler: (req, reply) => { throw new Error('boom') }
     })
-    registerWithSink(server, 'info', (data, enc, cb) => {
-      expect(data.req.id).to.exist()
+    await registerWithSink(server, 'info', (data, enc, cb) => {
       if (count === 0) {
         expect(data.err.message).to.equal('boom')
         expect(data.level).to.equal(40)
@@ -207,44 +234,49 @@ experiment('logs each request', () => {
       }
       count++
       cb()
-    }, (err) => {
-      expect(err).to.be.undefined()
-      server.inject('/')
     })
+    await server.inject('/')
+    await finish
   })
 
-  test('handles bad encoding', (done) => {
+  test('handles bad encoding', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     server.route({
       path: '/',
       method: 'GET',
-      handler: (req, reply) => reply('')
+      handler: (req, h) => ''
     })
-    registerWithSink(server, 'info', (data, enc) => {
-      expect(data.data.header).equal('a;b')
+    await registerWithSink(server, 'info', (data, enc) => {
+      expect(data.err.header).equal('a;b')
       done()
-    }, (err) => {
-      expect(err).to.be.undefined()
-      server.inject({
-        url: '/',
-        headers: { 'accept-encoding': 'a;b' }
-      })
     })
+    await server.inject({
+      url: '/',
+      headers: { 'accept-encoding': 'a;b' }
+    })
+    await finish
   })
 
-  test('set the request logger', (done) => {
+  test('set the request logger', async () => {
     const server = getServer()
     let count = 0
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     server.route({
       path: '/',
       method: 'GET',
-      handler: (req, reply) => {
+      handler: (req, h) => {
         req.logger.info('hello logger')
-        reply('hello world')
+        return 'hello world'
       }
     })
-    registerWithSink(server, 'info', (data, enc, cb) => {
-      expect(data.req.id).to.exist()
+    await registerWithSink(server, 'info', (data, enc, cb) => {
       if (count === 0) {
         expect(data.msg).to.equal('hello logger')
       } else {
@@ -254,68 +286,83 @@ experiment('logs each request', () => {
       }
       count++
       cb()
-    }, (err) => {
-      expect(err).to.be.undefined()
-      server.inject('/')
     })
+    await server.inject('/')
+    await finish
   })
 })
 
 experiment('logs through server.log', () => {
-  ltest((level, done) => {
+  ltest(async (level) => {
     const server = getServer()
-    tagsWithSink(server, {
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+
+    await tagsWithSink(server, {
       aaa: 'info'
     }, (data) => {
       expect(data.data).to.equal('hello world')
-      expect(data.level).to.equal(30)
-      done()
-    }, (err) => {
-      expect(err).to.be.undefined()
-      server.log(['aaa'], 'hello world')
+      resolver()
     })
+    server.log(['aaa'], 'hello world')
+
+    await done
   })
 
-  test('one log for multiple tags', (done) => {
+  test('one log for multiple tags', async () => {
     const server = getServer()
-    tagsWithSink(server, {
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+
+    await tagsWithSink(server, {
       aaa: 'info',
       bbb: 'warn'
     }, (data) => {
       expect(data.data).to.equal('hello world')
       // first matching tag
       expect(data.level).to.equal(30)
-      done()
-    }, (err) => {
-      expect(err).to.be.undefined()
-      server.log(['aaa', 'bbb'], 'hello world')
+      resolver()
     })
+
+    server.log(['aaa', 'bbb'], 'hello world')
+    await done
   })
 
-  test('explode with a wrong level', (done) => {
+  test('explode with a wrong level', async () => {
     const server = getServer()
-    server.register({
-      register: Pino.register,
-      options: {
-        tags: {
-          bbb: 'not a level'
+    try {
+      await server.register({
+        plugin: Pino,
+        options: {
+          tags: {
+            bbb: 'not a level'
+          }
         }
-      }
-    }, (err) => {
-      expect(err).to.be.error()
-      done()
-    })
+      })
+    } catch (err) {
+      return
+    }
+
+    throw new Error('expected error')
   })
 
-  test('with tag catchall', (done) => {
+  test('with tag catchall', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data.data).to.equal('hello world')
       expect(data.level).to.equal(20)
       done()
     })
     const plugin = {
-      register: Pino.register,
+      plugin: Pino,
       options: {
         stream: stream,
         level: 'debug',
@@ -323,101 +370,112 @@ experiment('logs through server.log', () => {
       }
     }
 
-    server.register(plugin, (err) => {
-      expect(err).to.be.undefined()
-      server.log(['something'], 'hello world')
-    })
+    await server.register(plugin)
+    server.log(['something'], 'hello world')
+    await finish
   })
 
-  test('default tag catchall', (done) => {
+  test('default tag catchall', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data.data).to.equal('hello world')
       expect(data.level).to.equal(30)
       done()
     })
     const plugin = {
-      register: Pino.register,
+      plugin: Pino,
       options: {
         stream: stream
       }
     }
 
-    server.register(plugin, (err) => {
-      expect(err).to.be.undefined()
-      server.log(['something'], 'hello world')
-    })
+    await server.register(plugin)
+    server.log(['something'], 'hello world')
+    await finish
   })
 })
 
 experiment('logs through request.log', () => {
-  ltest((level, done) => {
+  ltest(async (level) => {
     const server = getServer()
     server.route({
       path: '/',
       method: 'GET',
-      handler: (req, reply) => {
+      handler: (req, h) => {
         req.log(['aaa'], 'hello logger')
-        reply('hello world')
+        return 'hello world'
       }
     })
-    tagsWithSink(server, {
+
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+
+    await tagsWithSink(server, {
       aaa: level
     }, (data, enc, cb) => {
       if (data.tags) {
         expect(data.data).to.equal('hello logger')
-        done()
+        resolver()
       }
       cb()
-    }, (err) => {
-      expect(err).to.be.undefined()
-      server.inject('/')
     })
+
+    await server.inject('/')
+    await done
   })
 
-  test('uses default tag mapping', (done) => {
+  test('uses default tag mapping', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data.data).to.equal('hello world')
       expect(data.level).to.equal(20)
       done()
     })
     const plugin = {
-      register: Pino.register,
+      plugin: Pino,
       options: {
         stream: stream,
         level: 'debug'
       }
     }
 
-    server.register(plugin, (err) => {
-      expect(err).to.be.undefined()
-      server.log(['debug'], 'hello world')
-    })
+    await server.register(plugin)
+    server.log(['debug'], 'hello world')
+    await finish
   })
 })
 
 experiment('disables log events', () => {
   let server
 
-  beforeEach((cb) => {
-    server = getServer()
-    cb()
+  beforeEach(() => {
+    server = Hapi.server({ port: 0 })
   })
 
-  afterEach((cb) => {
-    server.stop()
-    cb()
+  afterEach(async () => {
+    if (server) {
+      await server.stop()
+    }
   })
 
-  test('server-start', (done) => {
+  test('server-start', async () => {
     let called = false
     const stream = sink(() => {
       called = true
     })
 
     const plugin = {
-      register: Pino.register,
+      plugin: Pino,
       options: {
         stream: stream,
         level: 'info',
@@ -425,24 +483,19 @@ experiment('disables log events', () => {
       }
     }
 
-    server.register(plugin, (err) => {
-      expect(err).to.be.undefined()
-      server.start((err) => {
-        expect(err).to.be.undefined()
-        expect(called).to.be.false()
-        done()
-      })
-    })
+    await server.register(plugin)
+    await server.start()
+    expect(called).to.be.false()
   })
 
-  test('server-stop', (done) => {
+  test('server-stop', async () => {
     let called = false
     const stream = sink(() => {
       called = true
     })
 
     const plugin = {
-      register: Pino.register,
+      plugin: Pino,
       options: {
         stream: stream,
         level: 'info',
@@ -450,24 +503,20 @@ experiment('disables log events', () => {
       }
     }
 
-    server.register(plugin, (err) => {
-      expect(err).to.be.undefined()
-      server.stop((err) => {
-        expect(err).to.be.undefined()
-        expect(called).to.be.false()
-        done()
-      })
-    })
+    await server.register(plugin)
+    await server.start()
+    await server.stop()
+    expect(called).to.be.false()
   })
 
-  test('response', (done) => {
+  test('response', async () => {
     let called = false
     const stream = sink(() => {
       called = true
     })
 
     const plugin = {
-      register: Pino.register,
+      plugin: Pino,
       options: {
         stream: stream,
         level: 'info',
@@ -475,23 +524,19 @@ experiment('disables log events', () => {
       }
     }
 
-    server.register(plugin, (err) => {
-      expect(err).to.be.undefined()
-      server.inject('/', (res) => {
-        expect(called).to.be.false()
-        done()
-      })
-    })
+    await server.register(plugin)
+    await server.inject('/')
+    expect(called).to.be.false()
   })
 
-  test('request-error', (done) => {
+  test('request-error', async () => {
     let called = false
     const stream = sink(() => {
       called = true
     })
 
     const plugin = {
-      register: Pino.register,
+      plugin: Pino,
       options: {
         stream: stream,
         level: 'info',
@@ -499,26 +544,27 @@ experiment('disables log events', () => {
       }
     }
 
-    server.register(plugin, (err) => {
-      expect(err).to.be.undefined()
-      server.route({
-        method: 'GET',
-        path: '/',
-        handler: (request, reply) => {
-          return reply(new Error('boom'))
-        }
-      })
-      server.inject('/', (res) => {
-        expect(called).to.be.false()
-        done()
-      })
+    await server.register(plugin)
+    server.route({
+      method: 'GET',
+      path: '/',
+      handler: (request, h) => {
+        return new Error('boom')
+      }
     })
+
+    await server.inject('/')
+    expect(called).to.be.false()
   })
 })
 
 experiment('uses a prior pino instance', () => {
-  test('without pre-defined serializers', (done) => {
+  test('without pre-defined serializers', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data.data).to.equal('hello world')
       expect(data.level).to.equal(30)
@@ -526,20 +572,23 @@ experiment('uses a prior pino instance', () => {
     })
     const logger = require('pino')(stream)
     const plugin = {
-      register: Pino.register,
+      plugin: Pino,
       options: {
         instance: logger
       }
     }
 
-    server.register(plugin, (err) => {
-      expect(err).to.be.undefined()
-      server.log(['something'], 'hello world')
-    })
+    await server.register(plugin)
+    server.log(['something'], 'hello world')
+    await finish
   })
 
-  test('with pre-defined serializers', (done) => {
+  test('with pre-defined serializers', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data.msg).to.equal('hello world')
       expect(data.foo).to.exist()
@@ -556,28 +605,31 @@ experiment('uses a prior pino instance', () => {
       }
     }, stream)
     const plugin = {
-      register: Pino.register,
+      plugin: Pino,
       options: {
         instance: logger
       }
     }
 
-    server.register(plugin, (err) => {
-      expect(err).to.be.undefined()
-      server.logger().info({foo: 'bar'}, 'hello world')
-    })
+    await server.register(plugin)
+    server.logger().info({foo: 'bar'}, 'hello world')
+    await finish
   })
 })
 
 experiment('logging with mergeHapiLogData option enabled', () => {
-  test('log event data is merged into pino\'s log object', (done) => {
+  test('log event data is merged into pino\'s log object', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data).to.include({ hello: 'world' })
       done()
     })
     const plugin = {
-      register: Pino.register,
+      plugin: Pino,
       options: {
         stream: stream,
         level: 'info',
@@ -585,20 +637,23 @@ experiment('logging with mergeHapiLogData option enabled', () => {
       }
     }
 
-    server.register(plugin, (err) => {
-      expect(err).to.be.undefined()
-      server.log(['info'], { hello: 'world' })
-    })
+    await server.register(plugin)
+    server.log(['info'], { hello: 'world' })
+    await finish
   })
 
-  test('when data is string, merge it as msg property', (done) => {
+  test('when data is string, merge it as msg property', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data).to.include({ msg: 'hello world' })
       done()
     })
     const plugin = {
-      register: Pino.register,
+      plugin: Pino,
       options: {
         stream: stream,
         level: 'info',
@@ -606,23 +661,26 @@ experiment('logging with mergeHapiLogData option enabled', () => {
       }
     }
 
-    server.register(plugin, (err) => {
-      expect(err).to.be.undefined()
-      server.log(['info'], 'hello world')
-    })
+    await server.register(plugin)
+    server.log(['info'], 'hello world')
+    await finish
   })
 })
 
 experiment('logging with overridden serializer', () => {
-  test('with pre-defined req serializer', (done) => {
+  test('with pre-defined req serializer', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data.req.uri).to.equal('/')
       done()
     })
     const logger = require('pino')(stream)
     const plugin = {
-      register: Pino.register,
+      plugin: Pino,
       options: {
         instance: logger,
         serializers: {
@@ -631,24 +689,27 @@ experiment('logging with overridden serializer', () => {
       }
     }
 
-    server.register(plugin, (err) => {
-      expect(err).to.be.undefined()
-      server.inject({
-        method: 'GET',
-        url: '/'
-      })
+    await server.register(plugin)
+    await server.inject({
+      method: 'GET',
+      url: '/'
     })
+    await finish
   })
 
-  test('with pre-defined res serializer', (done) => {
+  test('with pre-defined res serializer', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data.res.code).to.equal(404)
       done()
     })
     const logger = require('pino')(stream)
     const plugin = {
-      register: Pino.register,
+      plugin: Pino,
       options: {
         instance: logger,
         serializers: {
@@ -657,24 +718,27 @@ experiment('logging with overridden serializer', () => {
       }
     }
 
-    server.register(plugin, (err) => {
-      expect(err).to.be.undefined()
-      server.inject({
-        method: 'GET',
-        url: '/'
-      })
+    await server.register(plugin)
+    await server.inject({
+      method: 'GET',
+      url: '/'
     })
+    await finish
   })
 
-  test('with pre-defined err serializer', (done) => {
+  test('with pre-defined err serializer', async () => {
     const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
     const stream = sink((data) => {
       expect(data.err.errStack).to.not.be.undefined()
       done()
     })
     const logger = require('pino')(stream)
     const plugin = {
-      register: Pino.register,
+      plugin: Pino,
       options: {
         instance: logger,
         serializers: {
@@ -683,41 +747,45 @@ experiment('logging with overridden serializer', () => {
       }
     }
 
-    server.register(plugin, (err) => {
-      expect(err).to.be.undefined()
-      server.inject({
-        method: 'GET',
-        url: '/error'
-      })
+    await server.register(plugin)
+    await server.inject({
+      method: 'GET',
+      url: '/error'
     })
+    await finish
   })
 })
 
 experiment('logging with request payload', () => {
-  test('with pre-defined req serializer', (done) => {
+  test('with pre-defined req serializer', async () => {
     const server = getServer()
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
     const stream = sink((data) => {
       expect(data.payload).to.equal({ foo: 42 })
-      done()
+      resolver()
     })
     const logger = require('pino')(stream)
     const plugin = {
-      register: Pino.register,
+      plugin: Pino,
       options: {
         instance: logger,
         logPayload: true
       }
     }
 
-    server.register(plugin, (err) => {
-      expect(err).to.be.undefined()
-      server.inject({
-        method: 'POST',
-        url: '/',
-        payload: {
-          foo: 42
-        }
-      })
+    await server.register(plugin)
+
+    await server.inject({
+      method: 'POST',
+      url: '/',
+      payload: {
+        foo: 42
+      }
     })
+
+    await done
   })
 })

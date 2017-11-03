@@ -3,7 +3,7 @@
 const pino = require('pino')
 
 const levels = ['trace', 'debug', 'info', 'warn', 'error']
-module.exports.levelTags = {
+const levelTags = {
   trace: 'trace',
   debug: 'debug',
   info: 'info',
@@ -11,14 +11,14 @@ module.exports.levelTags = {
   error: 'error'
 }
 
-function register (server, options, next) {
+async function register (server, options) {
   options.serializers = options.serializers || {}
   options.serializers.req = options.serializers.req || asReqValue
   options.serializers.res = options.serializers.res || pino.stdSerializers.res
   options.serializers.err = options.serializers.err || pino.stdSerializers.err
 
   if (options.logEvents === undefined) {
-    options.logEvents = ['onPostStart', 'onPostStop', 'response', 'request-error']
+    options.logEvents = ['onPostStart', 'onPostStop', 'response', 'request']
   }
 
   var logger
@@ -38,12 +38,12 @@ function register (server, options, next) {
     logger = pino(options, stream)
   }
 
-  const tagToLevels = Object.assign({}, module.exports.levelTags, options.tags)
+  const tagToLevels = Object.assign({}, levelTags, options.tags)
   const allTags = options.allTags || 'info'
 
   const validTags = Object.keys(tagToLevels).filter((key) => levels.indexOf(tagToLevels[key]) < 0).length === 0
   if (!validTags || (allTags && levels.indexOf(allTags) < 0)) {
-    return next(new Error('invalid tag levels'))
+    throw new Error('invalid tag levels')
   }
 
   const mergeHapiLogData = options.mergeHapiLogData
@@ -52,26 +52,29 @@ function register (server, options, next) {
   server.decorate('server', 'logger', () => logger)
 
   // set a logger for each request
-  server.ext('onRequest', (request, reply) => {
+  server.ext('onRequest', (request, h) => {
     request.logger = logger.child({ req: request })
-    reply.continue()
+    return h.continue
   })
 
-  server.on('log', function (event) {
+  server.events.on('log', function (event) {
     logEvent(logger, event)
   })
 
-  server.on('request', function (request, event) {
-    request.logger = request.logger || logger.child({ req: request })
-    logEvent(request.logger, event)
-  })
-
   // log when a request completes with an error
-  tryAddEvent(server, options, 'on', 'request-error', function (request, err) {
-    request.logger.warn({
-      res: request.raw.res,
-      err: err
-    }, 'request error')
+  tryAddEvent(server, options, 'on', 'request', function (request, event, tags) {
+    if (event.channel === 'internal' && !tags['accept-encoding']) {
+      return
+    }
+
+    request.logger = request.logger || logger.child({ req: request })
+    if (event.error) {
+      request.logger.warn({
+        err: event.error
+      }, 'request error')
+    } else {
+      logEvent(request.logger, event)
+    }
   })
 
   // log when a request completes
@@ -84,21 +87,24 @@ function register (server, options, next) {
     }, 'request completed')
   })
 
-  tryAddEvent(server, options, 'ext', 'onPostStart', function (s, cb) {
+  tryAddEvent(server, options, 'ext', 'onPostStart', async function (s) {
     logger.info(server.info, 'server started')
-    cb()
   })
 
-  tryAddEvent(server, options, 'ext', 'onPostStop', function (s, cb) {
+  tryAddEvent(server, options, 'ext', 'onPostStop', async function (s) {
     logger.info(server.info, 'server stopped')
-    cb()
   })
-
-  next()
 
   function tryAddEvent (server, options, type, event, cb) {
-    if (options.logEvents && options.logEvents.indexOf(event) !== -1) {
-      server[type](event, cb)
+    var name = typeof event === 'string' ? event : event.name
+    if (options.logEvents && options.logEvents.indexOf(name) !== -1) {
+      if (type === 'on') {
+        server.events.on(event, cb)
+      } else if (type === 'ext') {
+        server.ext(event, cb)
+      } else {
+        throw new Error(`unsupporte type ${type}`)
+      }
     }
   }
 
@@ -137,7 +143,7 @@ function register (server, options, next) {
 function asReqValue (req) {
   const raw = req.raw.req
   return {
-    id: req.id,
+    id: req.info.id,
     method: raw.method,
     url: raw.url,
     headers: raw.headers,
@@ -146,7 +152,7 @@ function asReqValue (req) {
   }
 }
 
-module.exports.register = register
-module.exports.register.attributes = {
-  pkg: require('./package')
+module.exports = {
+  register,
+  name: 'hapi-pino'
 }
