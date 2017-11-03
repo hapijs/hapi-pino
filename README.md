@@ -4,6 +4,9 @@
 [Hapi](http://hapijs.com) plugin for the [Pino](https://github.com/pinojs/pino) logger. It logs in JSON for easy
 post-processing.
 
+[__hapi-pino v2.0.0__](https://github.com/pinojs/hapi-pino/tree/v2.x.x) is the LTS line for Hapi v16. __hapi-pino v3+__
+support Hapi v17 only.
+
 ## Install
 
 ```
