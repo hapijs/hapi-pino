@@ -51,9 +51,6 @@ async function start () {
     }
   })
 
-  // the logger is available in server.app
-  server.app.logger.warn('Pino is registered')
-
   // also as a decorated API
   server.logger().info('another way for accessing it')
 
@@ -120,12 +117,8 @@ server.log(['info'], {hello: 'world'})
 <a name="serverdecorations"></a>
 ### Server Decorations
 
-**hapi-pino** decorates the Hapi server with:
-
-* `server.logger()`, which is a function that returns the current instance of
-  [pino][pino], see its doc for the way to actual log.
-* `server.app.logger`, same as before, but the logger it is also
-  attached to the `server.app` object.
+**hapi-pino** decorates the Hapi server with `server.logger()`, which is a function that returns the current instance of
+  [pino][pino]. See its doc for the way to actual log.
 
 <a name="requestdecorations"></a>
 ### Request Decorations
