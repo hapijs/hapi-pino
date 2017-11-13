@@ -63,7 +63,7 @@ async function register (server, options) {
   server.ext('onRequest', (request, h) => {
     if (options.ignorePaths && ignoreTable[request.url.path]) {
       request.logger = nullLogger
-      return h.continue()
+      return h.continue
     }
     request.logger = logger.child({ req: request })
     return h.continue
