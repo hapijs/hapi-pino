@@ -1,6 +1,7 @@
 'use strict'
 
 const pino = require('pino')
+const nullLogger = require('abstract-logging')
 
 const levels = ['trace', 'debug', 'info', 'warn', 'error']
 const levelTags = {
@@ -45,10 +46,9 @@ async function register (server, options) {
   if (!validTags || (allTags && levels.indexOf(allTags) < 0)) {
     throw new Error('invalid tag levels')
   }
-  var nullLogger
+
   var ignoreTable = {}
   if (options.ignorePaths) {
-    nullLogger = buildNullLogger(levels)
     for (let i = 0; i < options.ignorePaths.length; i++) {
       ignoreTable[options.ignorePaths[i]] = true
     }
@@ -162,18 +162,6 @@ function asReqValue (req) {
     remoteAddress: raw.connection.remoteAddress,
     remotePort: raw.connection.remotePort
   }
-}
-
-function buildNullLogger (levels) {
-  var logger = {}
-
-  var noop = function () { }
-
-  for (let i = 0; i < levels.length; i++) {
-    logger[levels[i]] = noop
-  }
-
-  return logger
 }
 
 module.exports = {
