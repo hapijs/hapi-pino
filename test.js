@@ -670,7 +670,7 @@ experiment('uses a prior pino instance', () => {
     }
 
     await server.register(plugin)
-    server.logger().info({foo: 'bar'}, 'hello world')
+    server.logger().info({ foo: 'bar' }, 'hello world')
     await finish
   })
 })
@@ -844,6 +844,42 @@ experiment('logging with request payload', () => {
       }
     })
 
+    await done
+  })
+})
+
+experiment('ignore request logs for paths in ignorePaths', () => {
+  test('when path matches entry in ignorePaths, nothing should be logged', async () => {
+    const server = getServer()
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+    const stream = sink((data) => {
+      expect(data.req.url).to.not.equal('/ignored')
+      resolver()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        ignorePaths: ['/ignored']
+      }
+    }
+
+    await server.register(plugin)
+
+    await server.inject({
+      method: 'PUT',
+      url: '/ignored'
+    })
+
+    await server.inject({
+      method: 'PUT',
+      url: '/'
+
+    })
     await done
   })
 })
