@@ -558,6 +558,64 @@ experiment('disables log events', () => {
   })
 })
 
+experiment('logging with `request` event listener', () => {
+  test('with enabled `request-error`', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    const stream = sink((data) => {
+      expect(data.err.stack).to.not.be.undefined()
+      expect(data.err.isBoom).to.be.true()
+      expect(data.err.output.statusCode).to.be.equal(500)
+      done()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        logEvents: ['request-error']
+      }
+    }
+
+    await server.register(plugin)
+
+    await server.inject({
+      method: 'GET',
+      url: '/error'
+    })
+
+    await finish
+  })
+
+  test('with disabled `request-error`', async () => {
+    const server = getServer()
+    let called = false
+    const stream = sink(() => {
+      called = true
+    })
+
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        logEvents: false
+      }
+    }
+
+    await server.register(plugin)
+
+    await server.inject({
+      method: 'GET',
+      url: '/error'
+    })
+
+    expect(called).to.be.false()
+  })
+})
+
 experiment('uses a prior pino instance', () => {
   test('without pre-defined serializers', async () => {
     const server = getServer()
