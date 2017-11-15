@@ -18,7 +18,7 @@ async function register (server, options) {
   options.serializers.err = options.serializers.err || pino.stdSerializers.err
 
   if (options.logEvents === undefined) {
-    options.logEvents = ['onPostStart', 'onPostStop', 'response', 'request']
+    options.logEvents = ['onPostStart', 'onPostStop', 'response', 'request-error']
   }
 
   var logger
@@ -64,18 +64,20 @@ async function register (server, options) {
     logEvent(logger, event)
   })
 
-  // log when a request completes with an error
-  tryAddEvent(server, options, 'on', 'request', function (request, event, tags) {
+  // log via `request.log()` and optionally when an internal `accept-encoding`
+  // error occurs or request completes with an error
+  server.events.on('request', function (request, event, tags) {
     if (event.channel === 'internal' && !tags['accept-encoding']) {
       return
     }
 
     request.logger = request.logger || logger.child({ req: request })
-    if (event.error) {
+
+    if (event.error && isEnabledLogEvent(options, 'request-error')) {
       request.logger.warn({
         err: event.error
       }, 'request error')
-    } else {
+    } else if (event.channel === 'app') {
       logEvent(request.logger, event)
     }
   })
@@ -98,15 +100,19 @@ async function register (server, options) {
     logger.info(server.info, 'server stopped')
   })
 
+  function isEnabledLogEvent (options, name) {
+    return options.logEvents && options.logEvents.indexOf(name) !== -1
+  }
+
   function tryAddEvent (server, options, type, event, cb) {
     var name = typeof event === 'string' ? event : event.name
-    if (options.logEvents && options.logEvents.indexOf(name) !== -1) {
+    if (isEnabledLogEvent(options, name)) {
       if (type === 'on') {
         server.events.on(event, cb)
       } else if (type === 'ext') {
         server.ext(event, cb)
       } else {
-        throw new Error(`unsupporte type ${type}`)
+        throw new Error(`unsupported type ${type}`)
       }
     }
   }

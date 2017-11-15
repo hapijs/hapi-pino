@@ -96,7 +96,7 @@ events"](#hapievents) section.
   The instance's `stream` and `serializers` take precedence.
 - `[logEvents]` - Takes an array of strings with the events to log. Default is to
   log all events e.g. `['onPostStart', 'onPostStop', 'response', 'request-error']`.
-  Set to `false/null` to disable all events.
+  Set to `false/null` to disable all events. Even though there is no `request-error` [Hapi Event](#hapievents), the options enables the logging of failed requests.
 - `[mergeHapiLogData]` - When enabled, Hapi-pino will merge the data received
   from Hapi's logging interface (`server.log(tags, data)` or `request.log(tags, data)`)
   into Pino's logged attributes at root level. If data is a string, it will be used as
@@ -134,10 +134,8 @@ server.log(['info'], {hello: 'world'})
 
 * `'onRequest'`, to create a request-specific child logger
 * `'response'`, to log at `'info'` level when a request is completed
-* `'request'`, to log at `'warn'` level when a request errors for
-  `internal` and `accept-encoding` tags
-* `'log'`, to support logging via the Hapi `server.log()` and
-  `request.log()` methods, see `tags` and `allTags` options.
+* `'request'`, to support logging via the Hapi `request.log()` method and to log at `'warn'` level when a request errors or when request received contains an invalid `accept-encoding` header, see `tags` and `allTags` options.
+* `'log'`, to support logging via the Hapi `server.log()` method and to log in case of an internal server event, see `tags` and `allTags` options.
 * `'onPostStart'`, to log when the server is started
 * `'onPostStop'`, to log when the server is stopped
 
