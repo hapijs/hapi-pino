@@ -1,6 +1,6 @@
 {
   "name": "hapi-pino",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "Hapi plugin for the Pino logger ",
   "main": "index.js",
   "scripts": {
