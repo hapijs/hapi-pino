@@ -33,10 +33,7 @@ async function start () {
     }
   })
 
-  // the logger is available in server.app
-  server.app.logger.warn('Pino is registered')
-
-  // also as a decorated API
+  // as a decorated API
   server.logger().info('another way for accessing it')
 
   // and through Hapi standard logging system
