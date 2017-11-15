@@ -95,7 +95,7 @@ events"](#hapievents) section.
 - `[instance]` - uses a previously created Pino instance as the logger.
   The instance's `stream` and `serializers` take precedence.
 - `[logEvents]` - Takes an array of strings with the events to log. Default is to
-  log all events e.g. `['onPostStart', 'onPostStop', 'response', 'request-error']`.
+  log all events e.g. `['onPostStart', 'onPostStop', 'response', 'request']`.
   Set to `false/null` to disable all events.
 - `[mergeHapiLogData]` - When enabled, Hapi-pino will merge the data received
   from Hapi's logging interface (`server.log(tags, data)` or `request.log(tags, data)`)
