@@ -134,10 +134,8 @@ server.log(['info'], {hello: 'world'})
 
 * `'onRequest'`, to create a request-specific child logger
 * `'response'`, to log at `'info'` level when a request is completed
-* `'request'`, to log at `'warn'` level when a request errors for
-  `internal` and `accept-encoding` tags
-* `'log'`, to support logging via the Hapi `server.log()` and
-  `request.log()` methods, see `tags` and `allTags` options.
+* `'request'`, to support logging via the Hapi `request.log()` method and to log at `'warn'` level when a request errors for `accept-encoding` tags, see `tags` and `allTags` options.
+* `'log'`, to support logging via the Hapi `server.log()` method and to log in case of an internal server event, see `tags` and `allTags` options.
 * `'onPostStart'`, to log when the server is started
 * `'onPostStop'`, to log when the server is stopped
 
