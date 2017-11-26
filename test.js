@@ -755,6 +755,36 @@ experiment('logging with overridden serializer', () => {
     await finish
   })
 
+  test('with req serializer set to null', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    const stream = sink((data) => {
+      expect(data.req.uri).to.not.equal('/')
+      expect(data.req.raw).to.be.an.object()
+      done()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        serializers: {
+          req: null
+        }
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject({
+      method: 'GET',
+      url: '/'
+    })
+    await finish
+  })
+
   test('with pre-defined res serializer', async () => {
     const server = getServer()
     let done
