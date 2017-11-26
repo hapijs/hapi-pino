@@ -742,7 +742,7 @@ experiment('logging with overridden serializer', () => {
       options: {
         instance: logger,
         serializers: {
-          req: (req) => ({ uri: req.raw.req.url })
+          req: (req) => ({ uri: req.url })
         }
       }
     }
