@@ -19,7 +19,7 @@ async function register (server, options) {
     options.serializers.req = (req) => {
       return oriqReqSerializer(asReqValue(req))
     }
-  } else {
+  } else if (options.serializers.req !== null) {
     options.serializers.req = asReqValue
   }
   options.serializers.res = options.serializers.res || pino.stdSerializers.res
