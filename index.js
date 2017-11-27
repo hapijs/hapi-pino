@@ -15,9 +15,9 @@ const levelTags = {
 async function register (server, options) {
   options.serializers = options.serializers || {}
   if (options.serializers.req) {
-    const oriqReqSerializer = options.serializers.req
+    const origReqSerializer = options.serializers.req
     options.serializers.req = (req) => {
-      return oriqReqSerializer(asReqValue(req))
+      return origReqSerializer(asReqValue(req))
     }
   } else if (options.serializers.req !== null) {
     options.serializers.req = asReqValue
