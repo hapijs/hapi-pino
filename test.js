@@ -323,8 +323,8 @@ experiment('logs through server.log', () => {
       bbb: 'warn'
     }, (data) => {
       expect(data.data).to.equal('hello world')
-      // first matching tag
-      expect(data.level).to.equal(30)
+      // highest level tag
+      expect(data.level).to.equal(40)
       resolver()
     })
 

@@ -46,8 +46,13 @@ async function register (server, options) {
   const allTags = options.allTags || 'info'
 
   const validTags = Object.keys(tagToLevels).filter((key) => levels.indexOf(tagToLevels[key]) < 0).length === 0
-  if (!validTags || (allTags && levels.indexOf(allTags) < 0)) {
+  if (!validTags || levels.indexOf(allTags) < 0) {
     throw new Error('invalid tag levels')
+  }
+
+  const tagToLevelValue = {}
+  for (let tag in tagToLevels) {
+    tagToLevelValue[tag] = logger.levels.values[tagToLevels[tag]]
   }
 
   var ignoreTable = {}
@@ -132,8 +137,6 @@ async function register (server, options) {
   function logEvent (current, event) {
     var tags = event.tags
     var data = event.data
-    var level
-    var found = false
 
     var logObject
     if (mergeHapiLogData) {
@@ -146,16 +149,18 @@ async function register (server, options) {
       logObject = { tags, data }
     }
 
-    for (var i = 0; i < tags.length; i++) {
-      level = tagToLevels[tags[i]]
-      if (level) {
-        current[level](logObject)
-        found = true
-        break
+    let highest = 0
+
+    for (let tag of tags) {
+      const level = tagToLevelValue[tag]
+      if (level && level > highest) {
+        highest = level
       }
     }
 
-    if (!found && allTags) {
+    if (highest > 0) {
+      current[current.levels.labels[highest]](logObject)
+    } else {
       current[allTags](logObject)
     }
   }
