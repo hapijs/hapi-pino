@@ -99,6 +99,7 @@ async function register (server, options) {
     const info = request.info
     request.logger.info({
       payload: options.logPayload ? request.payload : undefined,
+      tags: options.logRouteTags ? request.route.settings.tags : undefined,
       res: request.raw.res,
       responseTime: info.responded - info.received
     }, 'request completed')

@@ -25,6 +25,9 @@ function getServer () {
     {
       method: 'GET',
       path: '/something',
+      options: {
+        tags: ['foo']
+      },
       handler: async (request, h) => 'ok'
     },
     {
@@ -880,6 +883,65 @@ experiment('ignore request logs for paths in ignorePaths', () => {
       url: '/'
 
     })
+    await done
+  })
+})
+
+experiment('logging with logRouteTags option enabled', () => {
+  test('when logRouteTags is true, tags are part of the logged object', async () => {
+    const server = getServer()
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+    const stream = sink((data) => {
+      expect(data.tags[0]).to.be.equal('foo')
+      resolver()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        logRouteTags: true
+      }
+    }
+
+    await server.register(plugin)
+
+    await server.inject({
+      method: 'GET',
+      url: '/something'
+    })
+
+    await done
+  })
+
+  test('when logRouteTags is not true, tags are not part of the logged object', async () => {
+    const server = getServer()
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+    const stream = sink((data) => {
+      expect(data.tags).to.be.undefined()
+      resolver()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger
+      }
+    }
+
+    await server.register(plugin)
+
+    await server.inject({
+      method: 'GET',
+      url: '/something'
+    })
+
     await done
   })
 })

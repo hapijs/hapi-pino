@@ -81,6 +81,7 @@ events"](#hapievents) section.
 
 ### Options
 - `[logPayload]` – when enabled, add the request payload as `payload` to the `response` event log. Defaults to `false`.
+- `[logRouteTags]` – when enabled, add the request route tags (as configured in hapi `route.options.tags`) `tags` to the `response` event log. Defaults to `false`.
 - `[stream]` - the binary stream to write stuff to, defaults to
   `process.stdout`.
 - `[prettyPrint]` - pretty print the logs (same as `node server |
