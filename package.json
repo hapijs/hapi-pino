@@ -1,6 +1,6 @@
 {
   "name": "hapi-pino",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "Hapi plugin for the Pino logger ",
   "main": "index.js",
   "scripts": {
@@ -21,7 +21,7 @@
     "code": "^5.1.2",
     "coveralls": "^3.0.0",
     "flush-write-stream": "^1.0.0",
-    "hapi": "^17.0.0",
+    "hapi": "^17.1.1",
     "lab": "^15.0.0",
     "make-promises-safe": "^1.1.0",
     "pre-commit": "^1.1.2",
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "abstract-logging": "^1.0.0",
-    "pino": "^4.10.0"
+    "pino": "^4.10.2"
   },
   "repository": {
     "type": "git",
