@@ -30,7 +30,7 @@
     "standard": "^10.0.0"
   },
   "dependencies": {
-    "pino": "^4.6.0"
+    "pino": "^4.10.2"
   },
   "repository": {
     "type": "git",
