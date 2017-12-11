@@ -26,15 +26,8 @@ function register (server, options, next) {
     options.instance.serializers = Object.assign(options.serializers, options.instance.serializers)
     logger = options.instance
   } else {
-    options.stream = options.stream || process.stdout
-    var stream = options.stream || process.stdout
-
-    if (options.prettyPrint) {
-      var pretty = pino.pretty()
-      pretty.pipe(stream)
-      stream = pretty
-    }
-
+    var stream = options.stream
+    delete options.stream
     logger = pino(options, stream)
   }
 
