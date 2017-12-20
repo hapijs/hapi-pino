@@ -314,6 +314,26 @@ experiment('logs through server.log', () => {
     await done
   })
 
+  test('with logged error object', async () => {
+    const server = getServer()
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+
+    await tagsWithSink(server, {}, (data) => {
+      expect(data.err.type).to.equal('Error')
+      expect(data.err.message).to.equal('foobar')
+      expect(data.err.stack).to.exist()
+      // highest level tag
+      expect(data.level).to.equal(40)
+      resolver()
+    })
+
+    server.log(['error'], new Error('foobar'))
+    await done
+  })
+
   test('one log for multiple tags', async () => {
     const server = getServer()
     let resolver

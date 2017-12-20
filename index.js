@@ -78,7 +78,11 @@ async function register (server, options) {
   })
 
   server.events.on('log', function (event) {
-    logEvent(logger, event)
+    if (event.error) {
+      logger.warn({ err: event.error })
+    } else if (event.channel === 'app') {
+      logEvent(logger, event)
+    }
   })
 
   // log via `request.log()` and optionally when an internal `accept-encoding`
