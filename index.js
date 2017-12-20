@@ -80,7 +80,7 @@ async function register (server, options) {
   server.events.on('log', function (event) {
     if (event.error) {
       logger.warn({ err: event.error })
-    } else if (event.channel === 'app') {
+    } else {
       logEvent(logger, event)
     }
   })
