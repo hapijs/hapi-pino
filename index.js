@@ -14,7 +14,14 @@ const levelTags = {
 
 async function register (server, options) {
   options.serializers = options.serializers || {}
-  options.serializers.req = options.serializers.req || asReqValue
+  if (options.serializers.req) {
+    const origReqSerializer = options.serializers.req
+    options.serializers.req = (req) => {
+      return origReqSerializer(asReqValue(req))
+    }
+  } else if (options.serializers.req !== null) {
+    options.serializers.req = asReqValue
+  }
   options.serializers.res = options.serializers.res || pino.stdSerializers.res
   options.serializers.err = options.serializers.err || pino.stdSerializers.err
 
