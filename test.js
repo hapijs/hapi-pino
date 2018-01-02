@@ -748,8 +748,8 @@ experiment('logging with mergeHapiLogData option enabled', () => {
   })
 })
 
-experiment('logging with overridden serializer', () => {
-  test('with pre-defined req serializer', async () => {
+experiment('custom serializers', () => {
+  test('logging with configured req serializer', async () => {
     const server = getServer()
     let done
     const finish = new Promise(function (resolve, reject) {
@@ -778,7 +778,7 @@ experiment('logging with overridden serializer', () => {
     await finish
   })
 
-  test('with pre-defined res serializer', async () => {
+  test('logging with configured res serializer', async () => {
     const server = getServer()
     let done
     const finish = new Promise(function (resolve, reject) {
@@ -786,6 +786,7 @@ experiment('logging with overridden serializer', () => {
     })
     const stream = sink((data) => {
       expect(data.res.code).to.equal(404)
+      expect(data.res.raw).to.be.an.object()
       done()
     })
     const logger = require('pino')(stream)
@@ -794,7 +795,7 @@ experiment('logging with overridden serializer', () => {
       options: {
         instance: logger,
         serializers: {
-          res: (res) => ({ code: res.statusCode })
+          res: (res) => ({ code: res.statusCode, raw: res.raw })
         }
       }
     }
@@ -807,7 +808,7 @@ experiment('logging with overridden serializer', () => {
     await finish
   })
 
-  test('with pre-defined err serializer', async () => {
+  test('logging with pre-defined err serializer', async () => {
     const server = getServer()
     let done
     const finish = new Promise(function (resolve, reject) {
@@ -832,6 +833,72 @@ experiment('logging with overridden serializer', () => {
     await server.inject({
       method: 'GET',
       url: '/error'
+    })
+    await finish
+  })
+
+  test('req.raw is not enumerable', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    const stream = sink((data) => {
+      expect(data.req).to.be.an.object()
+      done()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        serializers: {
+          req: (req) => {
+            expect(req.raw).to.be.an.object()
+            expect(req.propertyIsEnumerable('raw')).to.be.false()
+            return req
+          }
+        }
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject({
+      method: 'GET',
+      url: '/'
+    })
+    await finish
+  })
+
+  test('res.raw is not enumerable', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    const stream = sink((data) => {
+      expect(data.res).to.be.an.object()
+      done()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        serializers: {
+          res: (res) => {
+            expect(res.raw).to.be.an.object()
+            expect(res.propertyIsEnumerable('raw')).to.be.false()
+            return res
+          }
+        }
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject({
+      method: 'GET',
+      url: '/'
     })
     await finish
   })
