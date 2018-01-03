@@ -93,6 +93,14 @@ events"](#hapievents) section.
   mappings. The default level tags are exposed via `hapi-pino.levelTags`.
 - `[allTags]` - the logging level to apply to all tags not matched by
   `tags`, defaults to `'info'`.
+- `[serializers]` - an object to overwrite the default serializers. You can but don't have to overwrite all of them. E.g. to redact the authorization header in the logs:
+  ```
+  {
+    req: require('pino-noir')(['req.headers.authorization'])
+    res: ...
+    err: ...
+  }
+  ```
 - `[instance]` - uses a previously created Pino instance as the logger.
   The instance's `stream` and `serializers` take precedence.
 - `[logEvents]` - Takes an array of strings with the events to log. Default is to
@@ -103,17 +111,16 @@ events"](#hapievents) section.
   into Pino's logged attributes at root level. If data is a string, it will be used as
   the value for the `msg` key. Default is `false`, in which case data will be logged under 
   a `data` key.
+    E.g.
+  ```js
+  server.log(['info'], {hello: 'world'})
 
-  E.g.
-```js
-server.log(['info'], {hello: 'world'})
+  // with mergeHapiLogData: true
+  { level: 30, hello: 'world', ...}
 
-// with mergeHapiLogData: true
-{ level: 30, hello: 'world', ...}
-
-// with mergeHapiLogData: false (Default)
-{ level: 30, data: { hello: 'world' }}
-```
+  // with mergeHapiLogData: false (Default)
+  { level: 30, data: { hello: 'world' }}
+  ```
 
 <a name="serverdecorations"></a>
 ### Server Decorations
