@@ -96,7 +96,7 @@ events"](#hapievents) section.
 - `[serializers]` - an object to overwrite the default serializers. You can but don't have to overwrite all of them. E.g. to redact the authorization header in the logs:
   ```
   {
-    req: require('pino-noir')(['req.headers.authorization'])
+    req: require('pino-noir')(['req.headers.authorization']).req
     res: ...
     err: ...
   }
