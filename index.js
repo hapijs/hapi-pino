@@ -1,5 +1,6 @@
 'use strict'
 
+const Hoek = require('hoek')
 const pino = require('pino')
 const nullLogger = require('abstract-logging')
 
@@ -13,6 +14,9 @@ const levelTags = {
 }
 
 async function register (server, options) {
+  // clone all user options to account for internal mutations, except for existing stream and pino instances
+  options = Hoek.merge({ stream: options.stream, instance: options.instance }, Hoek.clone(options))
+
   options.serializers = options.serializers || {}
   options.serializers.req = wrapReqSerializer(options.serializers.req || asReqValue)
   options.serializers.res = wrapResSerializer(options.serializers.res || asResValue)

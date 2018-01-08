@@ -2,6 +2,7 @@
 
 const Code = require('code')
 const Lab = require('lab')
+const Hoek = require('hoek')
 const split = require('split2')
 const writeStream = require('flush-write-stream')
 const promisify = require('util').promisify
@@ -83,7 +84,7 @@ function onHelloWorld (data) {
 }
 
 function ltest (func) {
-  ;['trace', 'debug', 'info', 'warn', 'error'].forEach((level) => {
+  ['trace', 'debug', 'info', 'warn', 'error'].forEach((level) => {
     test(`at ${level}`, async () => {
       await func(level)
     })
@@ -292,6 +293,28 @@ experiment('logs each request', () => {
     })
     await server.inject('/')
     await finish
+  })
+
+  test('does not mutate options object', async () => {
+    const options = {
+      prettyPrint: true
+    }
+
+    let plugin
+    let optionsClone
+
+    async function register (server) {
+      plugin = {
+        plugin: Pino,
+        options
+      }
+
+      optionsClone = Hoek.clone(options)
+      await server.register(plugin)
+    }
+
+    await register(getServer())
+    expect(options).to.equal(optionsClone)
   })
 })
 
