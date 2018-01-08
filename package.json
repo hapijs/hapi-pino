@@ -1,6 +1,6 @@
 {
   "name": "hapi-pino",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Hapi plugin for the Pino logger ",
   "main": "index.js",
   "scripts": {
@@ -31,7 +31,7 @@
   "dependencies": {
     "abstract-logging": "^1.0.0",
     "hoek": "^5.0.2",
-    "pino": "^4.10.2"
+    "pino": "^4.10.3"
   },
   "repository": {
     "type": "git",
