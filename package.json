@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "abstract-logging": "^1.0.0",
+    "hoek": "^5.0.2",
     "pino": "^4.10.2"
   },
   "repository": {

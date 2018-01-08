@@ -83,7 +83,7 @@ function onHelloWorld (data) {
 }
 
 function ltest (func) {
-  ;['trace', 'debug', 'info', 'warn', 'error'].forEach((level) => {
+  ['trace', 'debug', 'info', 'warn', 'error'].forEach((level) => {
     test(`at ${level}`, async () => {
       await func(level)
     })
