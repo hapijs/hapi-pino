@@ -297,7 +297,8 @@ experiment('logs each request', () => {
 
   test('does not mutate options object', async () => {
     const options = {
-      prettyPrint: true
+      prettyPrint: true,
+      instance: require('pino')()
     }
 
     let plugin
@@ -314,6 +315,10 @@ experiment('logs each request', () => {
     }
 
     await register(getServer())
+
+    delete options.instance
+    delete optionsClone.instance
+
     expect(options).to.equal(optionsClone)
   })
 })
