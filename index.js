@@ -61,7 +61,8 @@ function register (server, options, next) {
 
   // log when a request completes with an error
   tryAddEvent(server, options, 'on', 'request-error', function (request, err) {
-    request.logger.warn({
+    const log = request.logger || logger
+    log.warn({
       res: request.raw.res,
       err: err
     }, 'request error')
@@ -70,7 +71,8 @@ function register (server, options, next) {
   // log when a request completes
   tryAddEvent(server, options, 'on', 'response', function (request) {
     const info = request.info
-    request.logger.info({
+    const log = request.logger || logger
+    log.info({
       payload: options.logPayload ? request.payload : undefined,
       res: request.raw.res,
       responseTime: info.responded - info.received
