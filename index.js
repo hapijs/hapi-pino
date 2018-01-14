@@ -37,8 +37,8 @@ async function register (server, options) {
     if (options.prettyPrint) {
       // pino has a similar logic that works slightly different
       // we must disable that
+      var pretty = pino.pretty(options.prettyPrint)
       delete options.prettyPrint
-      var pretty = pino.pretty()
       pretty.pipe(stream)
       stream = pretty
     }
