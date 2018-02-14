@@ -153,7 +153,7 @@ function asReqValue (req) {
   }
 }
 
-module.exports = {
-  register,
-  name: 'hapi-pino'
+module.exports.register = register
+module.exports.register.attributes = {
+  pkg: require('./package')
 }

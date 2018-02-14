@@ -723,37 +723,31 @@ experiment('logging with request payload', () => {
 })
 
 experiment('ignore request logs for paths in ignorePaths', () => {
-  test('when path matches entry in ignorePaths, nothing should be logged', async () => {
+  test('when path matches entry in ignorePaths, nothing should be logged', (done) => {
     const server = getServer()
-    let resolver
-    const done = new Promise((resolve, reject) => {
-      resolver = resolve
-    })
     const stream = sink((data) => {
       expect(data.req.url).to.not.equal('/ignored')
-      resolver()
+      done()
     })
     const logger = require('pino')(stream)
     const plugin = {
-      plugin: Pino,
+      register: Pino.register,
       options: {
         instance: logger,
         ignorePaths: ['/ignored']
       }
     }
 
-    await server.register(plugin)
-
-    await server.inject({
-      method: 'PUT',
-      url: '/ignored'
+    server.register(plugin, (err) => {
+      expect(err).to.be.undefined()
+      server.inject({
+        method: 'PUT',
+        url: '/ignored'
+      })
+      server.inject({
+        method: 'PUT',
+        url: '/'
+      })
     })
-
-    await server.inject({
-      method: 'PUT',
-      url: '/'
-
-    })
-    await done
   })
 })
