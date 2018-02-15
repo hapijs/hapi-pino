@@ -1,6 +1,7 @@
 'use strict'
 
 const pino = require('pino')
+const nullLogger = require('abstract-logging')
 
 const levels = ['trace', 'debug', 'info', 'warn', 'error']
 module.exports.levelTags = {
@@ -39,6 +40,13 @@ function register (server, options, next) {
     return next(new Error('invalid tag levels'))
   }
 
+  var ignoreTable = {}
+  if (options.ignorePaths) {
+    for (let i = 0; i < options.ignorePaths.length; i++) {
+      ignoreTable[options.ignorePaths[i]] = true
+    }
+  }
+
   const mergeHapiLogData = options.mergeHapiLogData
 
   // expose logger as 'server.logger()'
@@ -46,6 +54,10 @@ function register (server, options, next) {
 
   // set a logger for each request
   server.ext('onRequest', (request, reply) => {
+    if (options.ignorePaths && ignoreTable[request.url.path]) {
+      request.logger = nullLogger
+      return reply.continue()
+    }
     request.logger = logger.child({ req: request })
     reply.continue()
   })
