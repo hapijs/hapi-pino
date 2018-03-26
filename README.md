@@ -92,6 +92,14 @@ events"](#hapievents) section.
   mappings. The default level tags are exposed via `hapi-pino.levelTags`.
 - `[allTags]` - the logging level to apply to all tags not matched by
   `tags`, defaults to `'info'`.
+ `[serializers]` - an object to overwrite the default serializers. You can but don't have to overwrite all of them. E.g. to redact the authorization header in the logs:
+   ```
+    {
+      req: require('pino-noir')(['req.headers.authorization']).req
+      res: ...
+      err: ...
+    }
+   ```
 - `[instance]` - uses a previously created Pino instance as the logger.
   The instance's `stream` and `serializers` take precedence.
 - `[logEvents]` - Takes an array of strings with the events to log. Default is to
