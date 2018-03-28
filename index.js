@@ -1,6 +1,7 @@
 'use strict'
 
 const pino = require('pino')
+const stdSerializers = pino.stdSerializers
 const nullLogger = require('abstract-logging')
 
 const levels = ['trace', 'debug', 'info', 'warn', 'error']
@@ -14,8 +15,8 @@ module.exports.levelTags = {
 
 function register (server, options, next) {
   options.serializers = options.serializers || {}
-  options.serializers.req = options.serializers.req || asReqValue
-  options.serializers.res = options.serializers.res || pino.stdSerializers.res
+  options.serializers.req = stdSerializers.wrapRequestSerializer(options.serializers.req || stdSerializers.req)
+  options.serializers.res = stdSerializers.wrapResponseSerializer(options.serializers.res || stdSerializers.res)
   options.serializers.err = options.serializers.err || pino.stdSerializers.err
 
   if (options.logEvents === undefined) {
@@ -138,18 +139,6 @@ function register (server, options, next) {
     if (!found && allTags) {
       current[allTags](logObject)
     }
-  }
-}
-
-function asReqValue (req) {
-  const raw = req.raw.req
-  return {
-    id: req.id,
-    method: raw.method,
-    url: raw.url,
-    headers: raw.headers,
-    remoteAddress: raw.connection.remoteAddress,
-    remotePort: raw.connection.remotePort
   }
 }
 
