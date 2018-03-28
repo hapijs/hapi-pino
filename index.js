@@ -1,6 +1,7 @@
 'use strict'
 
 const pino = require('pino')
+const stdSerializers = pino.stdSerializers
 const nullLogger = require('abstract-logging')
 
 const levels = ['trace', 'debug', 'info', 'warn', 'error']
@@ -14,8 +15,8 @@ module.exports.levelTags = {
 
 function register (server, options, next) {
   options.serializers = options.serializers || {}
-  options.serializers.req = wrapReqSerializer(options.serializers.req || asReqValue)
-  options.serializers.res = wrapResSerializer(options.serializers.res || asResValue)
+  options.serializers.req = stdSerializers.wrapRequestSerializer(options.serializers.req || stdSerializers.req)
+  options.serializers.res = stdSerializers.wrapResponseSerializer(options.serializers.res || stdSerializers.res)
   options.serializers.err = options.serializers.err || pino.stdSerializers.err
 
   if (options.logEvents === undefined) {
@@ -138,115 +139,6 @@ function register (server, options, next) {
     if (!found && allTags) {
       current[allTags](logObject)
     }
-  }
-}
-
-var rawSymbol = Symbol.for('hapi-pino-raw-ref')
-var pinoReqProto = Object.create({}, {
-  id: {
-    enumerable: true,
-    writable: true,
-    value: ''
-  },
-  method: {
-    enumerable: true,
-    writable: true,
-    value: ''
-  },
-  url: {
-    enumerable: true,
-    writable: true,
-    value: ''
-  },
-  headers: {
-    enumerable: true,
-    writable: true,
-    value: {}
-  },
-  remoteAddress: {
-    enumerable: true,
-    writable: true,
-    value: ''
-  },
-  remotePort: {
-    enumerable: true,
-    writable: true,
-    value: ''
-  },
-  raw: {
-    enumerable: false,
-    get: function () {
-      return this[rawSymbol]
-    },
-    set: function (val) {
-      this[rawSymbol] = val
-    }
-  }
-})
-
-Object.defineProperty(pinoReqProto, rawSymbol, {
-  writable: true,
-  value: {}
-})
-
-function wrapReqSerializer (serializer) {
-  if (serializer === asReqValue) return asReqValue
-  return function wrappedReqSerializer (req) {
-    return serializer(asReqValue(req))
-  }
-}
-
-function asReqValue (req) {
-  const raw = req.raw.req
-  const _req = Object.create(pinoReqProto)
-  _req.id = req.id
-  _req.method = raw.method
-  _req.url = raw.url
-  _req.headers = raw.headers
-  _req.remoteAddress = raw.connection && raw.connection.remoteAddress
-  _req.remotePort = raw.connection && raw.connection.remotePort
-  _req.raw = req.raw
-  return _req
-}
-
-var pinoResProto = Object.create({}, {
-  statusCode: {
-    enumerable: true,
-    writable: true,
-    value: 0
-  },
-  header: {
-    enumerable: true,
-    writable: true,
-    value: ''
-  },
-  raw: {
-    enumerable: false,
-    get: function () {
-      return this[rawSymbol]
-    },
-    set: function (val) {
-      this[rawSymbol] = val
-    }
-  }
-})
-Object.defineProperty(pinoResProto, rawSymbol, {
-  writable: true,
-  value: {}
-})
-
-function asResValue (res) {
-  const _res = Object.create(pinoResProto)
-  _res.statusCode = res.statusCode
-  _res.header = res._header
-  _res.raw = res
-  return _res
-}
-
-function wrapResSerializer (serializer) {
-  if (serializer === asResValue) return asResValue
-  return function wrappedResSerializer (res) {
-    return serializer(asResValue(res))
   }
 }
 
