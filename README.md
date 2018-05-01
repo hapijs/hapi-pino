@@ -121,6 +121,7 @@ events"](#hapievents) section.
   // with mergeHapiLogData: false (Default)
   { level: 30, data: { hello: 'world' }}
   ```
+- `[ignorePaths]` - Takes an array of string routes and disables logging for each.  Useful for health checks or any route that does not need logging. E.g `['/health']`
 
 <a name="serverdecorations"></a>
 ### Server Decorations
