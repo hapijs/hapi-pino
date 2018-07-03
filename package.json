@@ -6,7 +6,7 @@
   "scripts": {
     "coverage": "lab test.js -c",
     "coveralls": "lab test.js -r lcov | coveralls",
-    "test": "standard && lab test.js"
+    "test": "standard && lab --timeout 100000 test.js"
   },
   "keywords": [
     "hapi",
@@ -22,7 +22,7 @@
     "coveralls": "^3.0.0",
     "flush-write-stream": "^1.0.0",
     "hapi": "^17.2.0",
-    "lab": "^15.0.0",
+    "lab": "^15.5.0",
     "make-promises-safe": "^1.1.0",
     "pre-commit": "^1.1.2",
     "split2": "^2.2.0",
@@ -31,7 +31,7 @@
   "dependencies": {
     "abstract-logging": "^1.0.0",
     "hoek": "^5.0.2",
-    "pino": "^4.15.3"
+    "pino": "^4.17.3"
   },
   "repository": {
     "type": "git",
