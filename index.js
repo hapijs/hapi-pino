@@ -3,6 +3,7 @@
 const Hoek = require('hoek')
 const pino = require('pino')
 const { stdSerializers } = pino
+const { serializersSym } = pino.symbols
 const nullLogger = require('abstract-logging')
 
 const levels = ['trace', 'debug', 'info', 'warn', 'error']
@@ -29,8 +30,13 @@ async function register (server, options) {
 
   var logger
   if (options.instance) {
-    options.instance.serializers = Object.assign(options.serializers, options.instance.serializers)
     logger = options.instance
+    const overrideDefaultErrorSerializer = (typeof options.serializers.err === 'function') &&
+      logger[serializersSym].err === stdSerializers.err
+    logger[serializersSym] = Object.assign({}, options.serializers, logger[serializersSym])
+    if (overrideDefaultErrorSerializer) {
+      logger[serializersSym].err = options.serializers.err
+    }
   } else {
     options.stream = options.stream || process.stdout
     var stream = options.stream || process.stdout

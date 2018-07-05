@@ -5,12 +5,20 @@
 post-processing.
 
 [__hapi-pino v2.0.0__](https://github.com/pinojs/hapi-pino/tree/v2.x.x) is the LTS line for Hapi v16. __hapi-pino v3+__
-support Hapi v17 only.
+supports Hapi v17 only. The maximum version that can be used with Hapi v16 is Pino v4.
 
 ## Install
 
+For Pino v5+
+
 ```
-npm i hapi-pino --save
+npm install hapi-pino
+```
+
+For Pino v4 and below:
+
+```
+npm install hapi-pino@legacy #install hapi-pino v4.x.x 
 ```
 
 ## Usage
