@@ -31,7 +31,8 @@
   "dependencies": {
     "abstract-logging": "^1.0.0",
     "hoek": "^5.0.3",
-    "pino": "^5.0.0"
+    "pino": "^5.0.1",
+    "pino-pretty": "^2.0.1"
   },
   "repository": {
     "type": "git",

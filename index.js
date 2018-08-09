@@ -40,16 +40,6 @@ async function register (server, options) {
   } else {
     options.stream = options.stream || process.stdout
     var stream = options.stream || process.stdout
-
-    if (options.prettyPrint) {
-      // pino has a similar logic that works slightly different
-      // we must disable that
-      var pretty = pino.pretty(options.prettyPrint)
-      delete options.prettyPrint
-      pretty.pipe(stream)
-      stream = pretty
-    }
-
     logger = pino(options, stream)
   }
 
