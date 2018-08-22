@@ -106,6 +106,14 @@ async function register (server, options) {
 
   // log when a request completes
   tryAddEvent(server, options, 'on', 'response', function (request) {
+    if (options.ignorePaths && ignoreTable[request.url.path]) {
+      return
+    }
+
+    if (!request.response) {
+      return
+    }
+
     const info = request.info
     request.logger.info({
       payload: options.logPayload ? request.payload : undefined,

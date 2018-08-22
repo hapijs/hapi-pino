@@ -1002,6 +1002,45 @@ experiment('ignore request logs for paths in ignorePaths', () => {
   })
 })
 
+experiment('ignore response logs for paths in ignorePaths', () => {
+  test('when path matches entry in ignorePaths, nothing should be logged', async () => {
+    const server = getServer()
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+    const stream = sink((data) => {
+      console.log(data)
+      expect(data.msg).to.equal('request completed')
+      expect(data.req.url).to.not.equal('/ignored')
+      resolver()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        logEvents: ['response'],
+        ignorePaths: ['/ignored']
+      }
+    }
+
+    await server.register(plugin)
+
+    await server.inject({
+      method: 'PUT',
+      url: '/ignored'
+    })
+
+    await server.inject({
+      method: 'PUT',
+      url: '/'
+
+    })
+    await done
+  })
+})
+
 experiment('logging with logRouteTags option enabled', () => {
   test('when logRouteTags is true, tags are part of the logged object', async () => {
     const server = getServer()
