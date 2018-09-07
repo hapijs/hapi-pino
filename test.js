@@ -1010,7 +1010,6 @@ experiment('ignore response logs for paths in ignorePaths', () => {
       resolver = resolve
     })
     const stream = sink((data) => {
-      console.log(data)
       expect(data.msg).to.equal('request completed')
       expect(data.req.url).to.not.equal('/ignored')
       resolver()
