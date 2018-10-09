@@ -130,8 +130,7 @@ events"](#hapievents) section.
   { level: 30, data: { hello: 'world' }}
   ```
 - `[ignorePaths]` - Takes an array of string routes and disables logging for each.  Useful for health checks or any route that does not need logging. E.g `['/health']`
-- `[level]` - Set the minumum level that Pino should log out. See [Level](https://github.com/pinojs/pino/blob/master/docs/API.md#level). For example, `{level: 'debug'}` would configure Pino to output all `debug` or higher events.
-
+- `[level]` - Set the minumum level that Pino should log out. See [Level](https://github.com/pinojs/pino/blob/master/docs/api.md#level). For example, `{level: 'debug'}` would configure Pino to output all `debug` or higher events.
 <a name="serverdecorations"></a>
 ### Server Decorations
 
