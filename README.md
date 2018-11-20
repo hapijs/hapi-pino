@@ -55,7 +55,9 @@ async function start () {
   await server.register({
     plugin: require('.'),
     options: {
-      prettyPrint: process.env.NODE_ENV !== 'production'
+      prettyPrint: process.env.NODE_ENV !== 'production',
+      // Redact Authorization headers, see https://getpino.io/#/docs/redaction
+      redact: ['req.headers.authorization']
     }
   })
 
@@ -131,6 +133,8 @@ events"](#hapievents) section.
   ```
 - `[ignorePaths]` - Takes an array of string routes and disables logging for each.  Useful for health checks or any route that does not need logging. E.g `['/health']`
 - `[level]` - Set the minumum level that Pino should log out. See [Level](https://github.com/pinojs/pino/blob/master/docs/api.md#level). For example, `{level: 'debug'}` would configure Pino to output all `debug` or higher events.
+- `[redact]` - Path to be redacted in the log lines. See the [log redaction](https://getpino.io/#/docs/redaction) docs for more details.
+
 <a name="serverdecorations"></a>
 ### Server Decorations
 
