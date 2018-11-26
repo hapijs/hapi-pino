@@ -18,11 +18,11 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "code": "^5.2.0",
+    "code": "^5.2.3",
     "coveralls": "^3.0.2",
     "flush-write-stream": "^1.0.3",
-    "hapi": "^17.5.4",
-    "lab": "^16.0.0",
+    "hapi": "^17.7.0",
+    "lab": "^16.1.0",
     "make-promises-safe": "^1.1.0",
     "pre-commit": "^1.1.2",
     "split2": "^3.0.0",
@@ -31,8 +31,8 @@
   "dependencies": {
     "abstract-logging": "^1.0.0",
     "hoek": "^5.0.4",
-    "pino": "^5.5.0",
-    "pino-pretty": "^2.1.0"
+    "pino": "^5.8.1",
+    "pino-pretty": "^2.2.3"
   },
   "repository": {
     "type": "git",

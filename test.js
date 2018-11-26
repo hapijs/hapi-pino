@@ -1098,3 +1098,34 @@ experiment('logging with logRouteTags option enabled', () => {
     await done
   })
 })
+
+experiment('log redact', () => {
+  test('authorization headers', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    const stream = sink((data) => {
+      expect(data.req.headers.authorization).to.equal('[Redacted]')
+      done()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream,
+        redact: ['req.headers.authorization']
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject({
+      method: 'GET',
+      url: '/something',
+      headers: {
+        authorization: 'Bearer 123'
+      }
+    })
+    await finish
+  })
+})
