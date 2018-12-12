@@ -22,7 +22,7 @@
     "coveralls": "^3.0.2",
     "flush-write-stream": "^1.0.3",
     "hapi": "^17.7.0",
-    "lab": "^16.1.0",
+    "lab": "^18.0.0",
     "make-promises-safe": "^1.1.0",
     "pre-commit": "^1.1.2",
     "split2": "^3.0.0",
@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "abstract-logging": "^1.0.0",
-    "hoek": "^5.0.4",
+    "hoek": "^6.1.2",
     "pino": "^5.8.1",
     "pino-pretty": "^2.2.3"
   },
