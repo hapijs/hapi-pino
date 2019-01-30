@@ -7,6 +7,6 @@ env:
   - HAPI=hapi@17
   - HAPI=hapi@18
 before_script:
-  - npm install --dev $HAPI
+  - npm install --save-dev $HAPI
 after_script:
   - npm run coveralls
