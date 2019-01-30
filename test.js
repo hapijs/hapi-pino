@@ -190,6 +190,33 @@ experiment('logs each request', () => {
     await finish
   })
 
+  test('track responseTime when server closes connection prematurely', async () => {
+    const server = getServer()
+
+    let done
+
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    await registerWithSink(server, 'info', (data) => {
+      expect(data.res.statusCode).to.equal(200)
+      expect(data.msg).to.equal('request completed')
+      expect(data.responseTime).to.be.a.number().greaterThan(0)
+      done()
+    })
+
+    server.inject({
+      url: '/',
+      method: 'POST',
+      simulate: {
+        close: true
+      }
+    })
+
+    await finish
+  })
+
   test('correctly set the status code', async () => {
     const server = getServer()
 
