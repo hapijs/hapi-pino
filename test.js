@@ -1,5 +1,6 @@
 'use strict'
 
+const Http = require('http')
 const Code = require('code')
 const Lab = require('lab')
 const Hoek = require('hoek')
@@ -187,6 +188,52 @@ experiment('logs each request', () => {
     })
 
     await server.inject('/')
+    await finish
+  })
+
+  test('track responseTime when connection aborted', async () => {
+    const server = Hapi.server()
+
+    let count = 0
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    server.route({
+      path: '/',
+      method: 'GET',
+      handler: async (req, h) => {
+        for (let i = 0; i < 100; ++i) {
+          await Hoek.wait(10)
+
+          if (!req.active()) {
+            break
+          }
+        }
+        return null
+      }
+    })
+    await registerWithSink(server, 'info', (data, enc, cb) => {
+      if (count === 2) {
+        expect(data.responseTime).to.be.at.least(10)
+        expect(data.msg).to.equal('request completed')
+        cb()
+        done()
+      } else {
+        count++
+        cb()
+      }
+    })
+    await server.start()
+
+    const req = Http.get(server.info.uri, res => {})
+    req.on('error', Hoek.ignore)
+
+    await Hoek.wait(50)
+    req.abort()
+    await server.stop()
+
     await finish
   })
 
