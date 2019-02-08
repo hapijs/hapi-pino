@@ -70,7 +70,7 @@ async function register (server, options) {
 
   // set a logger for each request
   server.ext('onRequest', (request, h) => {
-    if (options.ignorePaths && ignoreTable[request.url.path]) {
+    if (options.ignorePaths && ignoreTable[request.url.pathname]) {
       request.logger = nullLogger
       return h.continue
     }
@@ -106,7 +106,7 @@ async function register (server, options) {
 
   // log when a request completes
   tryAddEvent(server, options, 'on', 'response', function (request) {
-    if (options.ignorePaths && ignoreTable[request.url.path]) {
+    if (options.ignorePaths && ignoreTable[request.url.pathname]) {
       return
     }
 
