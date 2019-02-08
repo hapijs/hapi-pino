@@ -1001,7 +1001,7 @@ experiment('ignore request logs for paths in ignorePaths', () => {
       resolver = resolve
     })
     const stream = sink((data) => {
-      expect(data.req.url).to.not.equal('/ignored')
+      expect(data.req.url).to.endWith('/foo')
       resolver()
     })
     const logger = require('pino')(stream)
@@ -1022,7 +1022,7 @@ experiment('ignore request logs for paths in ignorePaths', () => {
 
     await server.inject({
       method: 'PUT',
-      url: '/'
+      url: '/foo'
 
     })
     await done
@@ -1037,8 +1037,8 @@ experiment('ignore response logs for paths in ignorePaths', () => {
       resolver = resolve
     })
     const stream = sink((data) => {
+      expect(data.req.url).to.endWith('/foo')
       expect(data.msg).to.equal('request completed')
-      expect(data.req.url).to.not.equal('/ignored')
       resolver()
     })
     const logger = require('pino')(stream)
@@ -1060,7 +1060,7 @@ experiment('ignore response logs for paths in ignorePaths', () => {
 
     await server.inject({
       method: 'PUT',
-      url: '/'
+      url: '/foo'
 
     })
     await done
