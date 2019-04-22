@@ -255,7 +255,7 @@ experiment('logs each request', () => {
     await registerWithSink(server, 'info', (data, enc, cb) => {
       if (count === 0) {
         expect(data.err.message).to.equal('boom')
-        expect(data.level).to.equal(40)
+        expect(data.level).to.equal(50)
         expect(data.msg).to.equal('request error')
       } else {
         expect(data.res.statusCode).to.equal(500)
@@ -381,7 +381,7 @@ experiment('logs through server.log', () => {
       expect(data.err.message).to.equal('foobar')
       expect(data.err.stack).to.exist()
       // highest level tag
-      expect(data.level).to.equal(40)
+      expect(data.level).to.equal(50)
       resolver()
     })
 
