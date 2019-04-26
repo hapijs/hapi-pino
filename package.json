@@ -6,7 +6,8 @@
   "scripts": {
     "coverage": "lab test.js -c",
     "coveralls": "lab test.js -r lcov | coveralls",
-    "test": "standard && lab --timeout 100000 test.js"
+    "test": "standard && lab --timeout 100000 test.js",
+    "fix": "standard --fix"
   },
   "keywords": [
     "hapi",
@@ -18,11 +19,11 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "code": "^5.2.4",
+    "@hapi/code": "^5.3.0",
     "coveralls": "^3.0.2",
     "flush-write-stream": "^1.0.3",
-    "hapi": "^18.0.0",
-    "lab": "^18.0.0",
+    "@hapi/hapi": "^18.2.0",
+    "@hapi/lab": "^18.1.0",
     "make-promises-safe": "^4.0.0",
     "pre-commit": "^1.1.2",
     "split2": "^3.0.0",
@@ -30,7 +31,7 @@
   },
   "dependencies": {
     "abstract-logging": "^1.0.0",
-    "hoek": "^6.1.2",
+    "@hapi/hoek": "^6.2.0",
     "pino": "^5.10.1",
     "pino-pretty": "^2.5.0"
   },
