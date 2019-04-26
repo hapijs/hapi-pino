@@ -6,8 +6,7 @@
   "scripts": {
     "coverage": "lab test.js -c",
     "coveralls": "lab test.js -r lcov | coveralls",
-    "test": "standard && lab --timeout 100000 test.js",
-    "fix": "standard --fix"
+    "test": "standard && lab --timeout 100000 test.js"
   },
   "keywords": [
     "hapi",
