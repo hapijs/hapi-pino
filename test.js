@@ -1,8 +1,8 @@
 'use strict'
 
-const Code = require('code')
-const Lab = require('lab')
-const Hoek = require('hoek')
+const Code = require('@hapi/code')
+const Lab = require('@hapi/lab')
+const Hoek = require('@hapi/hoek')
 const split = require('split2')
 const writeStream = require('flush-write-stream')
 const promisify = require('util').promisify
@@ -17,7 +17,7 @@ const after = lab.after
 const afterEach = lab.afterEach
 const expect = Code.expect
 
-const Hapi = require('hapi')
+const Hapi = require('@hapi/hapi')
 const Pino = require('.')
 
 function getServer () {
@@ -255,7 +255,7 @@ experiment('logs each request', () => {
     await registerWithSink(server, 'info', (data, enc, cb) => {
       if (count === 0) {
         expect(data.err.message).to.equal('boom')
-        expect(data.level).to.equal(40)
+        expect(data.level).to.equal(50)
         expect(data.msg).to.equal('request error')
       } else {
         expect(data.res.statusCode).to.equal(500)
@@ -381,7 +381,7 @@ experiment('logs through server.log', () => {
       expect(data.err.message).to.equal('foobar')
       expect(data.err.stack).to.exist()
       // highest level tag
-      expect(data.level).to.equal(40)
+      expect(data.level).to.equal(50)
       resolver()
     })
 

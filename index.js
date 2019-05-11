@@ -1,6 +1,6 @@
 'use strict'
 
-const Hoek = require('hoek')
+const Hoek = require('@hapi/hoek')
 const pino = require('pino')
 const { stdSerializers } = pino
 const { serializersSym } = pino.symbols
@@ -80,7 +80,7 @@ async function register (server, options) {
 
   server.events.on('log', function (event) {
     if (event.error) {
-      logger.warn({ err: event.error })
+      logger.error({ err: event.error })
     } else {
       logEvent(logger, event)
     }
@@ -96,7 +96,7 @@ async function register (server, options) {
     request.logger = request.logger || logger.child({ req: request })
 
     if (event.error && isEnabledLogEvent(options, 'request-error')) {
-      request.logger.warn({
+      request.logger.error({
         err: event.error
       }, 'request error')
     } else if (event.channel === 'app') {
