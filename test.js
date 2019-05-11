@@ -1,8 +1,8 @@
 'use strict'
 
-const Code = require('code')
-const Lab = require('lab')
-const Hoek = require('hoek')
+const Code = require('@hapi/code')
+const Lab = require('@hapi/lab')
+const Hoek = require('@hapi/hoek')
 const split = require('split2')
 const writeStream = require('flush-write-stream')
 const promisify = require('util').promisify
@@ -17,7 +17,7 @@ const after = lab.after
 const afterEach = lab.afterEach
 const expect = Code.expect
 
-const Hapi = require('hapi')
+const Hapi = require('@hapi/hapi')
 const Pino = require('.')
 
 function getServer () {

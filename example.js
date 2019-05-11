@@ -2,7 +2,7 @@
 
 require('make-promises-safe')
 
-const Hapi = require('hapi')
+const Hapi = require('@hapi/hapi')
 
 async function start () {
   // Create a server with a host and port
