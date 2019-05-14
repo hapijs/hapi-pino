@@ -3,7 +3,7 @@
 const Hoek = require('@hapi/hoek')
 const pino = require('pino')
 const { stdSerializers } = pino
-const { serializersSym } = pino.symbols
+const serializersSym = Symbol.for('pino.serializers')
 const nullLogger = require('abstract-logging')
 
 const levels = ['trace', 'debug', 'info', 'warn', 'error']
