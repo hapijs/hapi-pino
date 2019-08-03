@@ -145,6 +145,11 @@ async function register (server, options) {
   }
 
   function logEvent (current, event) {
+    // check for null logger
+    if (current === nullLogger) {
+      return
+    }
+
     var tags = event.tags
     var data = event.data
 

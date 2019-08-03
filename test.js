@@ -1067,6 +1067,64 @@ experiment('ignore response logs for paths in ignorePaths', () => {
   })
 })
 
+experiment('ignore request.log logs for paths in ignorePaths', () => {
+  test('when path matches entry in ignorePaths, nothing should be logged', async () => {
+    const level = 'info'
+    const server = getServer()
+    server.route({
+      path: '/ignored',
+      method: 'GET',
+      handler: (req, h) => {
+        req.log([level], 'hello logger')
+        return 'hello world'
+      }
+    })
+
+    server.route({
+      path: '/foo',
+      method: 'GET',
+      handler: (req, h) => {
+        req.log([level], 'foo')
+        return 'foo'
+      }
+    })
+
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+    const stream = sink((data) => {
+      expect(data.req.url).to.endWith('/foo')
+      expect(data.tags).to.equal([level])
+      expect(data.data).to.equal('foo')
+      resolver()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        logEvents: ['request-error'],
+        ignorePaths: ['/ignored']
+      }
+    }
+
+    await server.register(plugin)
+
+    await server.inject({
+      method: 'GET',
+      url: '/ignored'
+    })
+
+    await server.inject({
+      method: 'GET',
+      url: '/foo'
+
+    })
+    await done
+  })
+})
+
 experiment('logging with logRouteTags option enabled', () => {
   test('when logRouteTags is true, tags are part of the logged object', async () => {
     const server = getServer()
