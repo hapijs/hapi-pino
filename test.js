@@ -8,7 +8,7 @@ const writeStream = require('flush-write-stream')
 const promisify = require('util').promisify
 const sleep = promisify(setTimeout)
 
-const lab = exports.lab = Lab.script()
+const lab = (exports.lab = Lab.script())
 const experiment = lab.experiment
 const test = lab.test
 const before = lab.before
@@ -39,7 +39,9 @@ function getServer () {
     {
       method: 'GET',
       path: '/error',
-      handler: async (request, h) => { throw new Error('foobar') }
+      handler: async (request, h) => {
+        throw new Error('foobar')
+      }
     }
   ])
 
@@ -84,7 +86,7 @@ function onHelloWorld (data) {
 }
 
 function ltest (func) {
-  ['trace', 'debug', 'info', 'warn', 'error'].forEach((level) => {
+  ;['trace', 'debug', 'info', 'warn', 'error'].forEach(level => {
     test(`at ${level}`, async () => {
       await func(level)
     })
@@ -93,12 +95,14 @@ function ltest (func) {
 
 test('server.app.logger is undefined', async () => {
   const server = getServer()
-  await registerWithSink(server, 'info', () => { throw new Error('fail') })
+  await registerWithSink(server, 'info', () => {
+    throw new Error('fail')
+  })
   expect(server.app.logger).to.be.undefined()
 })
 
 experiment('logs through the server.logger()', () => {
-  ltest(async (level) => {
+  ltest(async level => {
     const server = getServer()
     await registerWithSink(server, level, onHelloWorld)
     server.logger()[level]('hello world')
@@ -148,7 +152,7 @@ experiment('logs each request', () => {
       done = resolve
     })
 
-    await registerWithSink(server, 'info', (data) => {
+    await registerWithSink(server, 'info', data => {
       expect(data.req.id).to.exists()
       expect(data.res.statusCode).to.equal(200)
       expect(data.msg).to.equal('request completed')
@@ -179,7 +183,7 @@ experiment('logs each request', () => {
       }
     })
 
-    await registerWithSink(server, 'info', (data) => {
+    await registerWithSink(server, 'info', data => {
       expect(data.res.statusCode).to.equal(200)
       expect(data.msg).to.equal('request completed')
       expect(data.responseTime).to.be.at.least(10)
@@ -199,10 +203,12 @@ experiment('logs each request', () => {
       done = resolve
     })
 
-    await registerWithSink(server, 'info', (data) => {
+    await registerWithSink(server, 'info', data => {
       expect(data.res.statusCode).to.equal(200)
       expect(data.msg).to.equal('request completed')
-      expect(data.responseTime).to.be.a.number().greaterThan(0)
+      expect(data.responseTime)
+        .to.be.a.number()
+        .greaterThan(0)
       done()
     })
 
@@ -250,7 +256,9 @@ experiment('logs each request', () => {
     server.route({
       path: '/',
       method: 'GET',
-      handler: (req, reply) => { throw new Error('boom') }
+      handler: (req, reply) => {
+        throw new Error('boom')
+      }
     })
     await registerWithSink(server, 'info', (data, enc, cb) => {
       if (count === 0) {
@@ -351,19 +359,23 @@ experiment('logs each request', () => {
 })
 
 experiment('logs through server.log', () => {
-  ltest(async (level) => {
+  ltest(async level => {
     const server = getServer()
     let resolver
     const done = new Promise((resolve, reject) => {
       resolver = resolve
     })
 
-    await tagsWithSink(server, {
-      aaa: 'info'
-    }, (data) => {
-      expect(data.data).to.equal('hello world')
-      resolver()
-    })
+    await tagsWithSink(
+      server,
+      {
+        aaa: 'info'
+      },
+      data => {
+        expect(data.data).to.equal('hello world')
+        resolver()
+      }
+    )
     server.log(['aaa'], 'hello world')
 
     await done
@@ -376,7 +388,7 @@ experiment('logs through server.log', () => {
       resolver = resolve
     })
 
-    await tagsWithSink(server, {}, (data) => {
+    await tagsWithSink(server, {}, data => {
       expect(data.err.type).to.equal('Error')
       expect(data.err.message).to.equal('foobar')
       expect(data.err.stack).to.exist()
@@ -396,15 +408,19 @@ experiment('logs through server.log', () => {
       resolver = resolve
     })
 
-    await tagsWithSink(server, {
-      aaa: 'info',
-      bbb: 'warn'
-    }, (data) => {
-      expect(data.data).to.equal('hello world')
-      // highest level tag
-      expect(data.level).to.equal(40)
-      resolver()
-    })
+    await tagsWithSink(
+      server,
+      {
+        aaa: 'info',
+        bbb: 'warn'
+      },
+      data => {
+        expect(data.data).to.equal('hello world')
+        // highest level tag
+        expect(data.level).to.equal(40)
+        resolver()
+      }
+    )
 
     server.log(['aaa', 'bbb'], 'hello world')
     await done
@@ -434,7 +450,7 @@ experiment('logs through server.log', () => {
     const finish = new Promise(function (resolve, reject) {
       done = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.data).to.equal('hello world')
       expect(data.level).to.equal(20)
       done()
@@ -459,7 +475,7 @@ experiment('logs through server.log', () => {
     const finish = new Promise(function (resolve, reject) {
       done = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.data).to.equal('hello world')
       expect(data.level).to.equal(30)
       done()
@@ -478,7 +494,7 @@ experiment('logs through server.log', () => {
 })
 
 experiment('logs through request.log', () => {
-  ltest(async (level) => {
+  ltest(async level => {
     const server = getServer()
     server.route({
       path: '/',
@@ -494,15 +510,19 @@ experiment('logs through request.log', () => {
       resolver = resolve
     })
 
-    await tagsWithSink(server, {
-      aaa: level
-    }, (data, enc, cb) => {
-      if (data.tags) {
-        expect(data.data).to.equal('hello logger')
-        resolver()
+    await tagsWithSink(
+      server,
+      {
+        aaa: level
+      },
+      (data, enc, cb) => {
+        if (data.tags) {
+          expect(data.data).to.equal('hello logger')
+          resolver()
+        }
+        cb()
       }
-      cb()
-    })
+    )
 
     await server.inject('/')
     await done
@@ -514,7 +534,7 @@ experiment('logs through request.log', () => {
     const finish = new Promise(function (resolve, reject) {
       done = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.data).to.equal('hello world')
       expect(data.level).to.equal(20)
       done()
@@ -643,7 +663,7 @@ experiment('logging with `request` event listener', () => {
     const finish = new Promise(function (resolve, reject) {
       done = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.err.stack).to.not.be.undefined()
       expect(data.err.isBoom).to.be.true()
       expect(data.err.output.statusCode).to.be.equal(500)
@@ -701,7 +721,7 @@ experiment('uses a prior pino instance', () => {
     const finish = new Promise(function (resolve, reject) {
       done = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.data).to.equal('hello world')
       expect(data.level).to.equal(30)
       done()
@@ -725,7 +745,7 @@ experiment('uses a prior pino instance', () => {
     const finish = new Promise(function (resolve, reject) {
       done = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.msg).to.equal('hello world')
       expect(data.foo).to.exist()
       expect(data.foo.serializedFoo).to.exist()
@@ -733,13 +753,16 @@ experiment('uses a prior pino instance', () => {
       expect(data.level).to.equal(30)
       done()
     })
-    const logger = require('pino')({
-      serializers: {
-        foo: (input) => {
-          return { serializedFoo: `foo is ${input}` }
+    const logger = require('pino')(
+      {
+        serializers: {
+          foo: input => {
+            return { serializedFoo: `foo is ${input}` }
+          }
         }
-      }
-    }, stream)
+      },
+      stream
+    )
     const plugin = {
       plugin: Pino,
       options: {
@@ -754,13 +777,13 @@ experiment('uses a prior pino instance', () => {
 })
 
 experiment('logging with mergeHapiLogData option enabled', () => {
-  test('log event data is merged into pino\'s log object', async () => {
+  test("log event data is merged into pino's log object", async () => {
     const server = getServer()
     let done
     const finish = new Promise(function (resolve, reject) {
       done = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data).to.include({ hello: 'world' })
       done()
     })
@@ -784,7 +807,7 @@ experiment('logging with mergeHapiLogData option enabled', () => {
     const finish = new Promise(function (resolve, reject) {
       done = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data).to.include({ msg: 'hello world' })
       done()
     })
@@ -810,7 +833,7 @@ experiment('custom serializers', () => {
     const finish = new Promise(function (resolve, reject) {
       done = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.req.uri).to.equal('/')
       done()
     })
@@ -820,7 +843,7 @@ experiment('custom serializers', () => {
       options: {
         instance: logger,
         serializers: {
-          req: (req) => ({ uri: req.raw.req.url })
+          req: req => ({ uri: req.raw.req.url })
         }
       }
     }
@@ -839,7 +862,7 @@ experiment('custom serializers', () => {
     const finish = new Promise(function (resolve, reject) {
       done = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.res.code).to.equal(404)
       expect(data.res.raw).to.be.an.object()
       done()
@@ -850,7 +873,7 @@ experiment('custom serializers', () => {
       options: {
         instance: logger,
         serializers: {
-          res: (res) => ({ code: res.statusCode, raw: res.raw })
+          res: res => ({ code: res.statusCode, raw: res.raw })
         }
       }
     }
@@ -869,7 +892,7 @@ experiment('custom serializers', () => {
     const finish = new Promise(function (resolve, reject) {
       done = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.err.errStack).to.not.be.undefined()
       done()
     })
@@ -879,7 +902,7 @@ experiment('custom serializers', () => {
       options: {
         instance: logger,
         serializers: {
-          err: (err) => ({ errStack: err.stack })
+          err: err => ({ errStack: err.stack })
         }
       }
     }
@@ -898,7 +921,7 @@ experiment('custom serializers', () => {
     const finish = new Promise(function (resolve, reject) {
       done = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.req).to.be.an.object()
       done()
     })
@@ -908,9 +931,9 @@ experiment('custom serializers', () => {
       options: {
         instance: logger,
         serializers: {
-          req: (req) => {
+          req: req => {
             expect(req.raw).to.be.an.object()
-            expect(req.propertyIsEnumerable('raw')).to.be.false()
+            expect(Object.prototype.propertyIsEnumerable.call(req, 'raw')).to.be.false()
             return req
           }
         }
@@ -931,7 +954,7 @@ experiment('custom serializers', () => {
     const finish = new Promise(function (resolve, reject) {
       done = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.res).to.be.an.object()
       done()
     })
@@ -941,9 +964,9 @@ experiment('custom serializers', () => {
       options: {
         instance: logger,
         serializers: {
-          res: (res) => {
+          res: res => {
             expect(res.raw).to.be.an.object()
-            expect(res.propertyIsEnumerable('raw')).to.be.false()
+            expect(Object.prototype.propertyIsEnumerable.call(res, 'raw')).to.be.false()
             return res
           }
         }
@@ -966,7 +989,7 @@ experiment('logging with request payload', () => {
     const done = new Promise((resolve, reject) => {
       resolver = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.payload).to.equal({ foo: 42 })
       resolver()
     })
@@ -1000,7 +1023,7 @@ experiment('ignore request logs for paths in ignorePaths', () => {
     const done = new Promise((resolve, reject) => {
       resolver = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.req.url).to.endWith('/foo')
       resolver()
     })
@@ -1023,7 +1046,6 @@ experiment('ignore request logs for paths in ignorePaths', () => {
     await server.inject({
       method: 'PUT',
       url: '/foo'
-
     })
     await done
   })
@@ -1036,7 +1058,7 @@ experiment('ignore response logs for paths in ignorePaths', () => {
     const done = new Promise((resolve, reject) => {
       resolver = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.req.url).to.endWith('/foo')
       expect(data.msg).to.equal('request completed')
       resolver()
@@ -1061,7 +1083,6 @@ experiment('ignore response logs for paths in ignorePaths', () => {
     await server.inject({
       method: 'PUT',
       url: '/foo'
-
     })
     await done
   })
@@ -1093,7 +1114,7 @@ experiment('ignore request.log logs for paths in ignorePaths', () => {
     const done = new Promise((resolve, reject) => {
       resolver = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.req.url).to.endWith('/foo')
       expect(data.tags).to.equal([level])
       expect(data.data).to.equal('foo')
@@ -1119,7 +1140,6 @@ experiment('ignore request.log logs for paths in ignorePaths', () => {
     await server.inject({
       method: 'GET',
       url: '/foo'
-
     })
     await done
   })
@@ -1132,7 +1152,7 @@ experiment('logging with logRouteTags option enabled', () => {
     const done = new Promise((resolve, reject) => {
       resolver = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.tags[0]).to.be.equal('foo')
       resolver()
     })
@@ -1161,7 +1181,7 @@ experiment('logging with logRouteTags option enabled', () => {
     const done = new Promise((resolve, reject) => {
       resolver = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.tags).to.be.undefined()
       resolver()
     })
@@ -1191,7 +1211,7 @@ experiment('log redact', () => {
     const finish = new Promise(function (resolve, reject) {
       done = resolve
     })
-    const stream = sink((data) => {
+    const stream = sink(data => {
       expect(data.req.headers.authorization).to.equal('[Redacted]')
       done()
     })
