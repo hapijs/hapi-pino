@@ -17,7 +17,10 @@ const levelTags = {
 
 async function register (server, options) {
   // clone all user options to account for internal mutations, except for existing stream and pino instances
-  options = Object.assign(Hoek.clone(options), { stream: options.stream, instance: options.instance })
+  options = Object.assign(Hoek.clone(options), {
+    stream: options.stream,
+    instance: options.instance
+  })
 
   options.serializers = options.serializers || {}
   options.serializers.req = stdSerializers.wrapRequestSerializer(options.serializers.req || stdSerializers.req)
@@ -31,8 +34,8 @@ async function register (server, options) {
   var logger
   if (options.instance) {
     logger = options.instance
-    const overrideDefaultErrorSerializer = (typeof options.serializers.err === 'function') &&
-      logger[serializersSym].err === stdSerializers.err
+    const overrideDefaultErrorSerializer =
+      typeof options.serializers.err === 'function' && logger[serializersSym].err === stdSerializers.err
     logger[serializersSym] = Object.assign({}, options.serializers, logger[serializersSym])
     if (overrideDefaultErrorSerializer) {
       logger[serializersSym].err = options.serializers.err
@@ -46,13 +49,13 @@ async function register (server, options) {
   const tagToLevels = Object.assign({}, levelTags, options.tags)
   const allTags = options.allTags || 'info'
 
-  const validTags = Object.keys(tagToLevels).filter((key) => levels.indexOf(tagToLevels[key]) < 0).length === 0
+  const validTags = Object.keys(tagToLevels).filter(key => levels.indexOf(tagToLevels[key]) < 0).length === 0
   if (!validTags || levels.indexOf(allTags) < 0) {
     throw new Error('invalid tag levels')
   }
 
   const tagToLevelValue = {}
-  for (let tag in tagToLevels) {
+  for (const tag in tagToLevels) {
     tagToLevelValue[tag] = logger.levels.values[tagToLevels[tag]]
   }
 
@@ -96,9 +99,12 @@ async function register (server, options) {
     request.logger = request.logger || logger.child({ req: request })
 
     if (event.error && isEnabledLogEvent(options, 'request-error')) {
-      request.logger.error({
-        err: event.error
-      }, 'request error')
+      request.logger.error(
+        {
+          err: event.error
+        },
+        'request error'
+      )
     } else if (event.channel === 'app') {
       logEvent(request.logger, event)
     }
@@ -111,12 +117,15 @@ async function register (server, options) {
     }
 
     const info = request.info
-    request.logger.info({
-      payload: options.logPayload ? request.payload : undefined,
-      tags: options.logRouteTags ? request.route.settings.tags : undefined,
-      res: request.raw.res,
-      responseTime: (info.completed !== undefined ? info.completed : info.responded) - info.received
-    }, 'request completed')
+    request.logger.info(
+      {
+        payload: options.logPayload ? request.payload : undefined,
+        tags: options.logRouteTags ? request.route.settings.tags : undefined,
+        res: request.raw.res,
+        responseTime: (info.completed !== undefined ? info.completed : info.responded) - info.received
+      },
+      'request completed'
+    )
   })
 
   tryAddEvent(server, options, 'ext', 'onPostStart', async function (s) {
@@ -166,7 +175,7 @@ async function register (server, options) {
 
     let highest = 0
 
-    for (let tag of tags) {
+    for (const tag of tags) {
       const level = tagToLevelValue[tag]
       if (level && level > highest) {
         highest = level
