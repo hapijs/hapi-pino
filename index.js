@@ -117,7 +117,7 @@ async function register (server, options) {
     }
 
     const info = request.info
-    request.logger.info(
+    logger.info(
       {
         payload: options.logPayload ? request.payload : undefined,
         tags: options.logRouteTags ? request.route.settings.tags : undefined,
