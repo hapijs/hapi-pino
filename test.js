@@ -776,6 +776,59 @@ experiment('uses a prior pino instance', () => {
   })
 })
 
+experiment('request.logger.child() bindings', () => {
+  test('request.logger.child() bindings are { req: request } by default', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    const stream = sink(data => {
+      expect(data.req).to.not.be.undefined()
+      expect(data.req.id).to.not.be.undefined()
+      expect(data.custom).to.be.undefined()
+      done()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info'
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject('/something')
+    await finish
+  })
+
+  test('request.logger.child() bindings can be provided via getChildBindings(request)', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    const stream = sink(data => {
+      expect(data.req).to.be.undefined()
+      expect(data.custom).to.not.be.undefined()
+      done()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info',
+        getChildBindings: (req) => ({ custom: true })
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject('/something')
+    await finish
+  })
+})
+
 experiment('logging with mergeHapiLogData option enabled', () => {
   test("log event data is merged into pino's log object", async () => {
     const server = getServer()

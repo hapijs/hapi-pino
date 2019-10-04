@@ -77,7 +77,10 @@ async function register (server, options) {
       request.logger = nullLogger
       return h.continue
     }
-    request.logger = logger.child({ req: request })
+
+    const childBindings = options.getChildBindings ? options.getChildBindings(request) : { req: request }
+    request.logger = logger.child(childBindings)
+
     return h.continue
   })
 
@@ -96,7 +99,8 @@ async function register (server, options) {
       return
     }
 
-    request.logger = request.logger || logger.child({ req: request })
+    const childBindings = options.getChildBindings ? options.getChildBindings(request) : { req: request }
+    request.logger = request.logger || logger.child(childBindings)
 
     if (event.error && isEnabledLogEvent(options, 'request-error')) {
       request.logger.error(
