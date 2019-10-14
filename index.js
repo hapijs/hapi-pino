@@ -67,6 +67,7 @@ async function register (server, options) {
   }
 
   const mergeHapiLogData = options.mergeHapiLogData
+  const getChildBindings = options.getChildBindings ? options.getChildBindings : (request) => ({ req: request })
 
   // expose logger as 'server.logger()'
   server.decorate('server', 'logger', () => logger)
@@ -77,7 +78,10 @@ async function register (server, options) {
       request.logger = nullLogger
       return h.continue
     }
-    request.logger = logger.child({ req: request })
+
+    const childBindings = getChildBindings(request)
+    request.logger = logger.child(childBindings)
+
     return h.continue
   })
 
@@ -96,7 +100,8 @@ async function register (server, options) {
       return
     }
 
-    request.logger = request.logger || logger.child({ req: request })
+    const childBindings = getChildBindings(request)
+    request.logger = request.logger || logger.child(childBindings)
 
     if (event.error && isEnabledLogEvent(options, 'request-error')) {
       request.logger.error(
