@@ -810,7 +810,7 @@ experiment('request.logger.child() bindings', () => {
       done = resolve
     })
     const stream = sink(data => {
-      expect(data.req).to.be.undefined()
+      expect(data.req).to.not.be.undefined()
       expect(data.custom).to.not.be.undefined()
       done()
     })

@@ -127,6 +127,7 @@ async function register (server, options) {
         payload: options.logPayload ? request.payload : undefined,
         tags: options.logRouteTags ? request.route.settings.tags : undefined,
         res: request.raw.res,
+        req: request,
         responseTime: (info.completed !== undefined ? info.completed : info.responded) - info.received
       },
       'request completed'
