@@ -82,6 +82,12 @@ async function register (server, options) {
     const childBindings = getChildBindings(request)
     request.logger = logger.child(childBindings)
 
+    if (options.logRequestStart) {
+      request.logger.info({
+        req: request
+      }, 'request start')
+    }
+
     return h.continue
   })
 
@@ -126,8 +132,10 @@ async function register (server, options) {
       {
         payload: options.logPayload ? request.payload : undefined,
         tags: options.logRouteTags ? request.route.settings.tags : undefined,
+        // note: pino doesnt support unsetting a key, so this next line
+        // has the effect of setting it or "leaving it as it was" if it was already added via child bindings
+        req: options.logRequestStart ? undefined : request,
         res: request.raw.res,
-        req: request,
         responseTime: (info.completed !== undefined ? info.completed : info.responded) - info.received
       },
       'request completed'
