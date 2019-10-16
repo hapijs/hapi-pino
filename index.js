@@ -68,6 +68,7 @@ async function register (server, options) {
 
   const mergeHapiLogData = options.mergeHapiLogData
   const getChildBindings = options.getChildBindings ? options.getChildBindings : (request) => ({ req: request })
+  const logRequestStart = options.logRequestStart
 
   // expose logger as 'server.logger()'
   server.decorate('server', 'logger', () => logger)
@@ -82,7 +83,7 @@ async function register (server, options) {
     const childBindings = getChildBindings(request)
     request.logger = logger.child(childBindings)
 
-    if (options.logRequestStart) {
+    if (logRequestStart) {
       request.logger.info({
         req: request
       }, 'request start')
@@ -134,7 +135,7 @@ async function register (server, options) {
         tags: options.logRouteTags ? request.route.settings.tags : undefined,
         // note: pino doesnt support unsetting a key, so this next line
         // has the effect of setting it or "leaving it as it was" if it was already added via child bindings
-        req: options.logRequestStart ? undefined : request,
+        req: logRequestStart ? undefined : request,
         res: request.raw.res,
         responseTime: (info.completed !== undefined ? info.completed : info.responded) - info.received
       },
