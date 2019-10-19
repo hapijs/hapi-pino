@@ -810,7 +810,7 @@ experiment('request.logger.child() bindings', () => {
       done = resolve
     })
     const stream = sink(data => {
-      expect(data.req).to.be.undefined()
+      expect(data.req).to.not.be.undefined()
       expect(data.custom).to.not.be.undefined()
       done()
     })
@@ -820,6 +820,134 @@ experiment('request.logger.child() bindings', () => {
         stream: stream,
         level: 'info',
         getChildBindings: (req) => ({ custom: true })
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject('/something')
+    await finish
+  })
+})
+
+experiment('options.logRequestStart', () => {
+  test('is default/false/omitted; only response events are logged, containing both the req and res', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    const stream = sink(data => {
+      expect(data.msg).to.equal('request completed')
+      expect(data.req).to.be.an.object()
+      expect(data.req.id).to.exists()
+      expect(data.res).to.be.an.object()
+      done()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info'
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject('/something')
+    await finish
+  })
+
+  test('when options.logRequestStart is true, log an event at the beginning of each request', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    const stream = sink(data => {
+      expect(data.msg).to.equal('request start')
+      expect(data.req).to.be.an.object()
+      expect(data.req.id).to.be.a.string()
+      done()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info',
+        logRequestStart: true
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject('/something')
+    await finish
+  })
+
+  test('when options.logRequestStart is true and options.getChildBindings does not omit req field, the onRequestComplete log event includes the req field', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    let count = 0
+    const stream = sink((data, enc, cb) => {
+      if (count === 0) {
+        expect(data.msg).to.equal('request start')
+        expect(data.req).to.be.an.object()
+        expect(data.res).to.be.undefined()
+      } else {
+        expect(data.msg).to.equal('request completed')
+        expect(data.req).to.be.an.object()
+        expect(data.res).to.be.an.object()
+        done()
+      }
+      count++
+      cb()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info',
+        logRequestStart: true
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject('/something')
+    await finish
+  })
+
+  test('when options.logRequestStart is true and options.getChildBindings omits the req field, the onRequestComplete log event omits the req field', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    let count = 0
+    const stream = sink((data, enc, cb) => {
+      if (count === 0) {
+        expect(data.msg).to.equal('request start')
+        expect(data.req).to.be.an.object()
+        expect(data.res).to.be.undefined()
+        expect(data.requestId).to.equal('request1234')
+      } else {
+        expect(data.msg).to.equal('request completed')
+        expect(data.req).to.be.undefined()
+        expect(data.res).to.be.an.object()
+        expect(data.requestId).to.equal('request1234')
+        done()
+      }
+      count++
+      cb()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info',
+        getChildBindings: (req) => ({ requestId: 'request1234' }),
+        logRequestStart: true
       }
     }
 

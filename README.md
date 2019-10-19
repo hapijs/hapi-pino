@@ -96,6 +96,8 @@ events"](#hapievents) section.
 ### Options
 - `[logPayload]` – when enabled, add the request payload as `payload` to the `response` event log. Defaults to `false`.
 - `[logRouteTags]` – when enabled, add the request route tags (as configured in hapi `route.options.tags`) `tags` to the `response` event log. Defaults to `false`.
+- `[logRequestStart]` - when enabled, add a log.info() at the beginning of Hapi requests.   Defaults to `false`
+  Note: when `logRequestStart` is enabled and `getChildBindings` is configured to omit the `req` field, then the `req` field will be omitted from the "request complete" log event. This behavior is useful if you want to separate requests from responses and link the two via requestId (frequently done via `headers['x-request-id']`) , where "request start" only logs the request and a requestId, and "request complete" only logs the response and the requestId.
 - `[stream]` - the binary stream to write stuff to, defaults to
   `process.stdout`.
 - `[prettyPrint]` - pretty print the logs (same as `node server |
