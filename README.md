@@ -94,22 +94,57 @@ start().catch((err) => {
 events"](#hapievents) section.
 
 ### Options
-- `[logPayload]` – when enabled, add the request payload as `payload` to the `response` event log. Defaults to `false`.
-- `[logRouteTags]` – when enabled, add the request route tags (as configured in hapi `route.options.tags`) `tags` to the `response` event log. Defaults to `false`.
-- `[logRequestStart]` - when enabled, add a log.info() at the beginning of Hapi requests.   Defaults to `false`
+### `options.logPayload: boolean`
+
+  **Default**: `false`
+
+  When enabled, add the request payload as `payload` to the `response` event log.
+
+
+### `options.logRouteTags: boolean`
+
+  **Default**: `false`
+
+  When enabled, add the request route tags (as configured in hapi `route.options.tags`) `tags` to the `response` event log.
+
+### `options.logRequestStart: boolean`
+
+  **Default**: false
+
+  When enabled, add a log.info() at the beginning of Hapi requests.
+
   Note: when `logRequestStart` is enabled and `getChildBindings` is configured to omit the `req` field, then the `req` field will be omitted from the "request complete" log event. This behavior is useful if you want to separate requests from responses and link the two via requestId (frequently done via `headers['x-request-id']`) , where "request start" only logs the request and a requestId, and "request complete" only logs the response and the requestId.
-- `[stream]` - the binary stream to write stuff to, defaults to
-  `process.stdout`.
-- `[prettyPrint]` - pretty print the logs (same as `node server |
-  pino`), disable in production. Default is `false`, enable in
-  development by passing `true`.
-- `[tags]` - a map to specify pairs of Hapi log tags and levels. By default,
-  the tags *trace*, *debug*, *info*, *warn*, and *error* map to their
-  corresponding level. Any mappings you supply take precedence over the default
-  mappings. The default level tags are exposed via `hapi-pino.levelTags`.
-- `[allTags]` - the logging level to apply to all tags not matched by
-  `tags`, defaults to `'info'`.
-- `[serializers]` - an object to overwrite the default serializers. You can but don't have to overwrite all of them. E.g. to redact the authorization header in the logs:
+
+### `options.stream` Pino.DestinationStream
+
+  **Default**: `process.stdout`
+
+  the binary stream to write stuff to
+
+### `options.prettyPrint: boolean`
+
+  **Default**: `false`
+
+  Pretty print the logs (same as `node server | pino`), disabled in production.  Enable in development by passing `true`
+
+### `options.tags: ({ [key in pino.Level]?: string })`
+
+  A map to specify pairs of Hapi log tags and levels.
+
+  The tags `trace`, `debug`, `info`, `warn`, and `error` map to their corresponding level. Any mappings you supply take precedence over the default mappings. The default level tags are exposed via `hapi-pino.levelTags`.
+
+### `options.allTags: pino.Level`
+
+  **Default**: `'info'`
+
+ The logging level to apply to all tags not matched by `tags`
+
+### `options.serializers: { [key: string]: pino.SerializerFn }`
+
+ An object to overwrite the default serializers. You can but don't have to overwrite all of them.
+
+ **Example**:  
+ To redact the authorization header in the logs:
   ```
   {
     req: require('pino-noir')(['req.headers.authorization']).req
@@ -117,17 +152,30 @@ events"](#hapievents) section.
     err: ...
   }
   ```
-- `[instance]` - uses a previously created Pino instance as the logger.
+
+### `options.instance: Pino`
+
+  Uses a previously created Pino instance as the logger.
   The instance's `stream` and `serializers` take precedence.
-- `[logEvents]` - Takes an array of strings with the events to log. Default is to
-  log all events e.g. `['onPostStart', 'onPostStop', 'response', 'request-error']`.
+
+### `options.logEvents: string[] | false | null`
+
+  **Default**: `['onPostStart', 'onPostStop', 'response', 'request-error']` (all events)
+
+  Takes an array of strings with the events to log.
+
   Set to `false/null` to disable all events. Even though there is no `request-error` [Hapi Event](#hapievents), the options enables the logging of failed requests.
-- `[mergeHapiLogData]` - When enabled, Hapi-pino will merge the data received
+
+### `options.mergeHapiLogData: boolean`
+
+  **Default**: `false`
+
+  When enabled, Hapi-pino will merge the data received
   from Hapi's logging interface (`server.log(tags, data)` or `request.log(tags, data)`)
-  into Pino's logged attributes at root level. If data is a string, it will be used as
-  the value for the `msg` key. Default is `false`, in which case data will be logged under 
-  a `data` key.
-    E.g.
+  into Pino's logged attributes at root level. If data is a string, it will be used as the value for the `msg` key.
+  When disabled, Hapi-pino will keep data under a `data` key.
+
+  **Example**:  
   ```js
   server.log(['info'], {hello: 'world'})
 
@@ -137,10 +185,36 @@ events"](#hapievents) section.
   // with mergeHapiLogData: false (Default)
   { level: 30, data: { hello: 'world' }}
   ```
-- `[getChildBindings]` - Takes a function with the request as an input, and returns the object that will be passed into pinoLogger.child(). If omitted, then `{ req: request }` will be used for the child bindings, which automatically adds the request to every pino log call
-- `[ignorePaths]` - Takes an array of string routes and disables logging for each.  Useful for health checks or any route that does not need logging. E.g `['/health']`
-- `[level]` - Set the minumum level that Pino should log out. See [Level](https://github.com/pinojs/pino/blob/master/docs/api.md#level). For example, `{level: 'debug'}` would configure Pino to output all `debug` or higher events.
-- `[redact]` - Path to be redacted in the log lines. See the [log redaction](https://getpino.io/#/docs/redaction) docs for more details.
+
+### `options.getChildBindings: (request) => { [key]: any }`
+
+  **Default**: `() => { req: Request }`, which automatically adds the request to every pino log call
+
+  Takes a function with the request as an input, and returns the object that will be passed into pinoLogger.child().
+
+### `options.ignorePaths: string[]`
+  Takes an array of string routes and disables logging for each.  Useful for health checks or any route that does not need logging.
+
+  **Example**:  
+  Do not log for /health route
+  ```js
+  ignorePaths: ['/health']
+  ```
+
+### `options.level: Pino.Level`
+  **Default**: `'info'`
+
+  Set the minumum level that Pino should log out. See [Level](https://github.com/pinojs/pino/blob/master/docs/api.md#level).
+
+  **Example**:  
+  Configure Pino to output all `debug` or higher events:
+  ```js
+  level: 'debug'
+  ```
+
+### `options.redact: string[] | pino.redactOptions`
+
+  Path to be redacted in the log lines. See the [log redaction](https://getpino.io/#/docs/redaction) docs for more details.
 
 <a name="serverdecorations"></a>
 ### Server Decorations
