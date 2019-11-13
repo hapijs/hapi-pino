@@ -188,8 +188,6 @@ events"](#hapievents) section.
 
 ### `options.getChildBindings: (request) => { [key]: any }`
 
-  **Default**: `() => { req: Request }`, which automatically adds the request to every pino log call
-
   Takes a function with the request as an input, and returns the object that will be passed into pinoLogger.child().
 
 ### `options.ignorePaths: string[]`

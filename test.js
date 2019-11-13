@@ -897,7 +897,7 @@ experiment('options.logRequestStart', () => {
         expect(data.res).to.be.undefined()
       } else {
         expect(data.msg).to.equal('request completed')
-        expect(data.req).to.be.an.object()
+        expect(data.req).to.be.undefined()
         expect(data.res).to.be.an.object()
         done()
       }
@@ -1286,7 +1286,7 @@ experiment('ignore request.log logs for paths in ignorePaths', () => {
       path: '/foo',
       method: 'GET',
       handler: (req, h) => {
-        req.log([level], 'foo')
+        req.log([level], 'foo from handler')
         return 'foo'
       }
     })
@@ -1295,10 +1295,10 @@ experiment('ignore request.log logs for paths in ignorePaths', () => {
     const done = new Promise((resolve, reject) => {
       resolver = resolve
     })
+
     const stream = sink(data => {
-      expect(data.req.url).to.endWith('/foo')
       expect(data.tags).to.equal([level])
-      expect(data.data).to.equal('foo')
+      expect(data.data).to.equal('foo from handler')
       resolver()
     })
     const logger = require('pino')(stream)
