@@ -1232,6 +1232,41 @@ experiment('ignore request logs for paths in ignorePaths', () => {
   })
 })
 
+experiment('ignore request logs for tags in ignoreTags', () => {
+  test('when tag matches entry in ignoreTags, nothing should be logged', async () => {
+    const server = getServer()
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+    const stream = sink(data => {
+      expect(data.req.url).to.endWith('/foo')
+      resolver()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        ignoreTags: ['foo']
+      }
+    }
+
+    await server.register(plugin)
+
+    await server.inject({
+      method: 'GET',
+      url: '/something'
+    })
+
+    await server.inject({
+      method: 'PUT',
+      url: '/foo'
+    })
+    await done
+  })
+})
+
 experiment('ignore response logs for paths in ignorePaths', () => {
   test('when path matches entry in ignorePaths, nothing should be logged', async () => {
     const server = getServer()
@@ -1259,6 +1294,43 @@ experiment('ignore response logs for paths in ignorePaths', () => {
     await server.inject({
       method: 'PUT',
       url: '/ignored'
+    })
+
+    await server.inject({
+      method: 'PUT',
+      url: '/foo'
+    })
+    await done
+  })
+})
+
+experiment('ignore response logs for tags in ignoreTags', () => {
+  test('when tag matches entry in ignoreTags, nothing should be logged', async () => {
+    const server = getServer()
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+    const stream = sink(data => {
+      expect(data.req.url).to.endWith('/foo')
+      expect(data.msg).to.equal('request completed')
+      resolver()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        logEvents: ['response'],
+        ignoreTags: ['foo']
+      }
+    }
+
+    await server.register(plugin)
+
+    await server.inject({
+      method: 'GET',
+      url: '/something'
     })
 
     await server.inject({
@@ -1308,6 +1380,66 @@ experiment('ignore request.log logs for paths in ignorePaths', () => {
         instance: logger,
         logEvents: ['request-error'],
         ignorePaths: ['/ignored']
+      }
+    }
+
+    await server.register(plugin)
+
+    await server.inject({
+      method: 'GET',
+      url: '/ignored'
+    })
+
+    await server.inject({
+      method: 'GET',
+      url: '/foo'
+    })
+    await done
+  })
+})
+
+experiment('ignore request.log logs for tags in ignoreTags', () => {
+  test('when tag matches entry in ignoreTags, nothing should be logged', async () => {
+    const level = 'info'
+    const server = getServer()
+    server.route({
+      method: 'GET',
+      path: '/ignored',
+      options: {
+        tags: ['foo']
+      },
+      handler: (req, h) => {
+        req.log([level], 'hello logger')
+        return 'hello world'
+      }
+    })
+
+    server.route({
+      path: '/foo',
+      method: 'GET',
+      handler: (req, h) => {
+        req.log([level], 'foo')
+        return 'foo'
+      }
+    })
+
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+    const stream = sink(data => {
+      expect(data.req.url).to.endWith('/foo')
+      expect(data.tags).to.equal([level])
+      expect(data.data).to.equal('foo')
+      resolver()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        logEvents: ['request-error'],
+        ignoreTags: ['foo']
       }
     }
 

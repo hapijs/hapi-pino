@@ -75,7 +75,7 @@ async function register (server, options) {
 
   // set a logger for each request
   server.ext('onRequest', (request, h) => {
-    if (options.ignorePaths && ignoreTable[request.url.pathname]) {
+    if (isLoggingIgnored(options, request)) {
       request.logger = nullLogger
       return h.continue
     }
@@ -103,7 +103,10 @@ async function register (server, options) {
   // log via `request.log()` and optionally when an internal `accept-encoding`
   // error occurs or request completes with an error
   server.events.on('request', function (request, event, tags) {
-    if (event.channel === 'internal' && !tags['accept-encoding']) {
+    if (
+      (event.channel === 'internal' && !tags['accept-encoding']) ||
+      isLoggingIgnored(options, request)
+    ) {
       return
     }
 
@@ -124,7 +127,7 @@ async function register (server, options) {
 
   // log when a request completes
   tryAddEvent(server, options, 'on', 'response', function (request) {
-    if (options.ignorePaths && ignoreTable[request.url.pathname]) {
+    if (isLoggingIgnored(options, request)) {
       return
     }
 
@@ -150,6 +153,21 @@ async function register (server, options) {
   tryAddEvent(server, options, 'ext', 'onPostStop', async function (s) {
     logger.info(server.info, 'server stopped')
   })
+
+  function isLoggingIgnored (options, request) {
+    return (
+      (
+        options.ignoreTags &&
+        options.ignoreTags.some(
+          (ignoreTag) => (
+            request.route.settings.tags &&
+            request.route.settings.tags.includes(ignoreTag)
+          )
+        )
+      ) ||
+      (options.ignorePaths && ignoreTable[request.url.pathname])
+    )
+  }
 
   function isEnabledLogEvent (options, name) {
     return options.logEvents && options.logEvents.indexOf(name) !== -1
