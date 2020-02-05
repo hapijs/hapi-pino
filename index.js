@@ -129,6 +129,9 @@ async function register (server, options) {
     }
 
     const info = request.info
+    const childBindings = getChildBindings(request)
+    request.logger = request.logger || logger.child(childBindings)
+
     request.logger.info(
       {
         payload: options.logPayload ? request.payload : undefined,
