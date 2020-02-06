@@ -68,7 +68,16 @@ async function register (server, options) {
 
   const mergeHapiLogData = options.mergeHapiLogData
   const getChildBindings = options.getChildBindings ? options.getChildBindings : (request) => ({ req: request })
-  const logRequestStart = options.logRequestStart
+  const shouldLogRequestStart = typeof options.logRequestStart === 'function'
+    ? (request) => options.logRequestStart(request)
+    : typeof options.logRequestStart === 'boolean'
+      ? () => !!options.logRequestStart
+      : () => false
+  const shouldLogRequestComplete = typeof options.logRequestComplete === 'function'
+    ? (request) => options.logRequestComplete(request)
+    : typeof options.logRequestComplete === 'boolean'
+      ? () => !!options.logRequestComplete
+      : () => true
 
   // expose logger as 'server.logger()'
   server.decorate('server', 'logger', () => logger)
@@ -83,7 +92,7 @@ async function register (server, options) {
     const childBindings = getChildBindings(request)
     request.logger = logger.child(childBindings)
 
-    if (logRequestStart) {
+    if (shouldLogRequestStart(request)) {
       request.logger.info({
         req: request
       }, 'request start')
@@ -130,25 +139,25 @@ async function register (server, options) {
       return
     }
 
-    const info = request.info
-
-    if (!request.logger) {
-      const childBindings = getChildBindings(request)
-      request.logger = logger.child(childBindings)
+    if (shouldLogRequestComplete(request)) {
+      const info = request.info
+      if (!request.logger) {
+        const childBindings = getChildBindings(request)
+        request.logger = logger.child(childBindings)
+      }
+      request.logger.info(
+        {
+          payload: options.logPayload ? request.payload : undefined,
+          tags: options.logRouteTags ? request.route.settings.tags : undefined,
+          // note: pino doesnt support unsetting a key, so this next line
+          // has the effect of setting it or "leaving it as it was" if it was already added via child bindings
+          req: shouldLogRequestStart(request) ? undefined : request,
+          res: request.raw.res,
+          responseTime: (info.completed !== undefined ? info.completed : info.responded) - info.received
+        },
+        'request completed'
+      )
     }
-
-    request.logger.info(
-      {
-        payload: options.logPayload ? request.payload : undefined,
-        tags: options.logRouteTags ? request.route.settings.tags : undefined,
-        // note: pino doesnt support unsetting a key, so this next line
-        // has the effect of setting it or "leaving it as it was" if it was already added via child bindings
-        req: logRequestStart ? undefined : request,
-        res: request.raw.res,
-        responseTime: (info.completed !== undefined ? info.completed : info.responded) - info.received
-      },
-      'request completed'
-    )
   })
 
   tryAddEvent(server, options, 'ext', 'onPostStart', async function (s) {

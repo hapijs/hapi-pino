@@ -107,13 +107,26 @@ events"](#hapievents) section.
 
   When enabled, add the request route tags (as configured in hapi `route.options.tags`) `tags` to the `response` event log.
 
-### `options.logRequestStart: boolean`
+### `options.logRequestStart: boolean | (Request) => boolean`
 
   **Default**: false
 
-  When enabled, add a log.info() at the beginning of Hapi requests.
+  Whether hapi-pino should add a `log.info()` at the beginning of Hapi requests for the given Request.
 
-  Note: when `logRequestStart` is enabled and `getChildBindings` is configured to omit the `req` field, then the `req` field will be omitted from the "request complete" log event. This behavior is useful if you want to separate requests from responses and link the two via requestId (frequently done via `headers['x-request-id']`) , where "request start" only logs the request and a requestId, and "request complete" only logs the response and the requestId.
+  For convenience, you can pass in `true` to always log `request start` events, or `false` to disable logging `request start` events
+
+  Note: when `logRequestStart` is enabled and `getChildBindings` is configured to omit the `req` field, then the `req` field will be
+  omitted from the `request completed` log event. This behavior is useful if you want to separate requests from responses and link the
+  two via requestId (frequently done via `headers['x-request-id']`) , where "request start" only logs the request and a requestId,
+  and `request completed` only logs the response and the requestId.
+
+### `options.logRequestComplete: boolean | (Request) => Boolean`
+
+  **Default**: true
+
+  Whether hapi-pino should add a `log.info()` at the completion of Hapi requests for the given Request.
+
+  For convenience, you can pass in `true` to always log `request complete` events, or `false` to disable logging `request complete` events
 
 ### `options.stream` Pino.DestinationStream
 
@@ -129,9 +142,10 @@ events"](#hapievents) section.
 
 ### `options.tags: ({ [key in pino.Level]?: string })`
 
-  A map to specify pairs of Hapi log tags and levels.
+  **Default**: exposed via `hapi-pino.levelTags`
 
-  The tags `trace`, `debug`, `info`, `warn`, and `error` map to their corresponding level. Any mappings you supply take precedence over the default mappings. The default level tags are exposed via `hapi-pino.levelTags`.
+  A map to specify pairs of Hapi log tags and levels.  The tags `trace`, `debug`, `info`, `warn`, and `error` map to their corresponding level.
+  Any mappings you supply take precedence over the default mappings.
 
 ### `options.allTags: pino.Level`
 

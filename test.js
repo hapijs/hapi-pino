@@ -858,7 +858,34 @@ experiment('request.logger.child() bindings', () => {
 })
 
 experiment('options.logRequestStart', () => {
-  test('is default/false/omitted; only response events are logged, containing both the req and res', async () => {
+  test('when options.logRequestStart is is default/omitted; only response events are logged, containing both the req and res', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    const stream = sink(data => {
+      expect(data.msg).to.equal('request completed')
+      expect(data.req).to.be.an.object()
+      expect(data.req.id).to.exists()
+      expect(data.res).to.be.an.object()
+      done()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info'
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject('/something')
+    await finish
+  })
+
+  test('when options.logRequestStart is false, only response events are logged, containing both the req and res', async () => {
     const server = getServer()
     let done
     const finish = new Promise(function (resolve, reject) {
@@ -908,6 +935,69 @@ experiment('options.logRequestStart', () => {
 
     await server.register(plugin)
     await server.inject('/something')
+    await finish
+  })
+
+  test('when options.logRequestStart is a function, log an event at the beginning of each request if the function resolves to true for that request', async () => {
+    const server = getServer()
+    server.route({
+      path: '/ignored',
+      method: 'GET',
+      handler: (req, h) => {
+        return 'ignored'
+      }
+    })
+
+    server.route({
+      path: '/foo',
+      method: 'GET',
+      handler: (req, h) => {
+        return 'foo'
+      }
+    })
+
+    let done
+    const finish = new Promise((resolve, reject) => {
+      done = resolve
+    })
+    let count = 0
+    const stream = sink((data, enc, cb) => {
+      if (count === 0) {
+        expect(data.req.url).to.endWith('/ignored')
+        expect(data.msg).to.equal('request completed')
+      } else if (count === 1) {
+        expect(data.req.url).to.endWith('/foo')
+        expect(data.msg).to.equal('request start')
+      } else {
+        expect(data.req.url).to.endWith('/foo')
+        expect(data.msg).to.equal('request completed')
+        done()
+      }
+      count++
+      cb()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        logRequestStart: (request) => {
+          return request.url.pathname !== '/ignored'
+        }
+      }
+    }
+
+    await server.register(plugin)
+
+    await server.inject({
+      method: 'GET',
+      url: '/ignored'
+    })
+
+    await server.inject({
+      method: 'GET',
+      url: '/foo'
+    })
     await finish
   })
 
@@ -981,6 +1071,149 @@ experiment('options.logRequestStart', () => {
 
     await server.register(plugin)
     await server.inject('/something')
+    await finish
+  })
+})
+
+experiment('options.logRequestComplete', () => {
+  test('when options.logRequestComplete is default/omitted; response events are logged, containing both the req and res', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    const stream = sink(data => {
+      expect(data.msg).to.equal('request completed')
+      expect(data.req).to.be.an.object()
+      expect(data.req.id).to.exists()
+      expect(data.res).to.be.an.object()
+      done()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info'
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject('/something')
+    await finish
+  })
+
+  test('when options.logRequestComplete is true; response events are logged, containing both the req and res', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    const stream = sink(data => {
+      expect(data.msg).to.equal('request completed')
+      expect(data.req).to.be.an.object()
+      expect(data.req.id).to.exists()
+      expect(data.res).to.be.an.object()
+      done()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info',
+        logRequestComplete: true
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject('/something')
+    await finish
+  })
+
+  test('when options.logRequestComplete is false; response events are not logged', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    let count = 0
+    const stream = sink((data, enc, cb) => {
+      if (count === 0) {
+        expect(data.msg).to.equal('request start')
+      } else {
+        expect(data.msg).to.equal('request start')
+        done()
+      }
+      count++
+      cb()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info',
+        logRequestStart: true,
+        logRequestComplete: false
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject('/something')
+    await server.inject('/something')
+    await finish
+  })
+
+  test('when options.logRequestComplete is a function, log an event at the completion of each request if the function resolves to true for that request', async () => {
+    const server = getServer()
+    server.route({
+      path: '/ignored',
+      method: 'GET',
+      handler: (req, h) => {
+        return 'ignored'
+      }
+    })
+
+    server.route({
+      path: '/foo',
+      method: 'GET',
+      handler: (req, h) => {
+        return 'foo'
+      }
+    })
+
+    let done
+    const finish = new Promise((resolve, reject) => {
+      done = resolve
+    })
+    const stream = sink((data, enc, cb) => {
+      expect(data.req.url).to.endWith('/foo')
+      expect(data.msg).to.equal('request completed')
+      done()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        logRequestComplete: (request) => {
+          return request.url.pathname !== '/ignored'
+        }
+      }
+    }
+
+    await server.register(plugin)
+
+    await server.inject({
+      method: 'GET',
+      url: '/ignored'
+    })
+
+    await server.inject({
+      method: 'GET',
+      url: '/foo'
+    })
     await finish
   })
 })
