@@ -356,6 +356,34 @@ experiment('logs each request', () => {
 
     expect(options).to.equal(optionsClone)
   })
+
+  test('handles removed request.logger', async () => {
+    const server = getServer()
+
+    let done
+
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    server.route({
+      path: '/',
+      method: 'GET',
+      handler: async (req, h) => {
+        req.logger = undefined
+        return 'hello world'
+      }
+    })
+
+    await registerWithSink(server, 'info', data => {
+      expect(data.res.statusCode).to.equal(200)
+      expect(data.msg).to.equal('request completed')
+      done()
+    })
+
+    await server.inject('/')
+    await finish
+  })
 })
 
 experiment('logs through server.log', () => {
