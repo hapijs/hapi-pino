@@ -155,18 +155,24 @@ async function register (server, options) {
   })
 
   function isLoggingIgnored (options, request) {
-    return (
-      (
-        options.ignoreTags &&
-        options.ignoreTags.some(
-          (ignoreTag) => (
-            request.route.settings.tags &&
-            request.route.settings.tags.includes(ignoreTag)
-          )
-        )
-      ) ||
-      (options.ignorePaths && ignoreTable[request.url.pathname])
-    )
+    if (options.ignorePaths && ignoreTable[request.url.pathname]) {
+      return true
+    }
+
+    const ignoreTags = options.ignoreTags
+    const routeTags = request.route.settings.tags
+
+    if (!ignoreTags || !routeTags) {
+      return false
+    }
+
+    for (var index = ignoreTags.length; index >= 0; index--) {
+      if (routeTags.includes(ignoreTags[index])) {
+        return true
+      }
+    }
+
+    return false
   }
 
   function isEnabledLogEvent (options, name) {
