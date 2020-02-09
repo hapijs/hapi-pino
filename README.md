@@ -215,6 +215,15 @@ events"](#hapievents) section.
   ignorePaths: ['/health']
   ```
 
+### `options.ignoreTags: string[]`
+  Takes an array of string tags and disables logging for each.  Useful for health checks or any route that does not need logging.
+
+  **Example**:  
+  Do not log for route with `healthcheck` tag
+  ```js
+  ignoreTags: ['healthcheck']
+  ```
+
 ### `options.level: Pino.Level`
   **Default**: `'info'`
 
