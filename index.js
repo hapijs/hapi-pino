@@ -79,8 +79,8 @@ async function register (server, options) {
       ? () => !!options.logRequestComplete
       : () => true
 
-  // expose logger as 'server.logger()'
-  server.decorate('server', 'logger', () => logger)
+  // expose logger as 'server.logger'
+  server.decorate('server', 'logger', logger)
 
   // set a logger for each request
   server.ext('onRequest', (request, h) => {
