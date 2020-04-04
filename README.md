@@ -6,23 +6,17 @@ post-processing.
 
 ## Supported Hapi versions
 
-- [__hapi-pino v2.0.0__](https://github.com/pinojs/hapi-pino/tree/v2.x.x) is the LTS line for Hapi v16. 
-- __hapi-pino v3+__
+- hapi-pino v7.x supports Hapi v18 and v19.
+- hapi-pino v6.x supports Hapi v17, v18 and v19
+- hapi-pino v5.x supports Hapi v17 and v18
+- hapi-pino v3.x
 supports Hapi v17 only. The maximum version that can be used with Hapi v16 is Pino v4.
-- hapi-pino v5.3+ supports Hapi v17 and v18
+- [hapi-pino v2.x](https://github.com/pinojs/hapi-pino/tree/v2.x.x) is the LTS line for Hapi v16.
 
 ## Install
 
-For Pino v5+
-
 ```
 npm install hapi-pino
-```
-
-For Pino v4 and below:
-
-```
-npm install hapi-pino@legacy #install hapi-pino v4.x.x 
 ```
 
 ## Usage
