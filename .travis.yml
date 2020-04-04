@@ -1,17 +1,13 @@
 language: node_js
 sudo: false
 node_js:
-  - "8"
   - "10"
   - "12"
 env:
-  - HAPI=hapi@17
   - HAPI=@hapi/hapi@18
   - HAPI=@hapi/hapi@19
 matrix:
   exclude:
-  - node_js: 8
-    env: HAPI=@hapi/hapi@19
   - node_js: 10
     env: HAPI=@hapi/hapi@19
 before_script:

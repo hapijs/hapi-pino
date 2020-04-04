@@ -18,21 +18,21 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "@hapi/code": "^6.0.0",
-    "@hapi/hapi": "^18.4.0",
-    "@hapi/lab": "^21.0.0",
-    "coveralls": "^3.0.7",
+    "@hapi/code": "^8.0.0",
+    "@hapi/hapi": "^19.0.0",
+    "@hapi/lab": "^22.0.0",
+    "coveralls": "^3.0.11",
     "flush-write-stream": "^2.0.0",
     "make-promises-safe": "^5.1.0",
     "pre-commit": "^1.2.2",
     "split2": "^3.1.1",
-    "standard": "^14.3.1"
+    "standard": "^14.3.3"
   },
   "dependencies": {
-    "@hapi/hoek": "^8.3.0",
-    "abstract-logging": "^1.0.0",
-    "pino": "^5.13.5",
-    "pino-pretty": "^3.2.2"
+    "@hapi/hoek": "^9.0.0",
+    "abstract-logging": "^2.0.0",
+    "pino": "^6.0.0",
+    "pino-pretty": "^4.0.0"
   },
   "repository": {
     "type": "git",
