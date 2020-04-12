@@ -101,11 +101,11 @@ test('server.app.logger is undefined', async () => {
   expect(server.app.logger).to.be.undefined()
 })
 
-experiment('logs through the server.logger()', () => {
+experiment('logs through the server.logger', () => {
   ltest(async level => {
     const server = getServer()
     await registerWithSink(server, level, onHelloWorld)
-    server.logger()[level]('hello world')
+    server.logger[level]('hello world')
   })
 })
 
@@ -799,7 +799,7 @@ experiment('uses a prior pino instance', () => {
     }
 
     await server.register(plugin)
-    server.logger().info({ foo: 'bar' }, 'hello world')
+    server.logger.info({ foo: 'bar' }, 'hello world')
     await finish
   })
 })

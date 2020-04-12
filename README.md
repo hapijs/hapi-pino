@@ -60,7 +60,7 @@ async function start () {
   })
 
   // also as a decorated API
-  server.logger().info('another way for accessing it')
+  server.logger.info('another way for accessing it')
 
   // and through Hapi standard logging system
   server.log(['subsystem'], 'third way for accessing it')
@@ -236,7 +236,7 @@ events"](#hapievents) section.
 <a name="serverdecorations"></a>
 ### Server Decorations
 
-**hapi-pino** decorates the Hapi server with `server.logger()`, which is a function that returns the current instance of
+**hapi-pino** decorates the Hapi server with `server.logger`, which is an instance of
   [pino][pino]. See its doc for the way to actual log.
 
 <a name="requestdecorations"></a>
