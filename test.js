@@ -1459,7 +1459,7 @@ experiment('logging with request payload', () => {
 })
 
 experiment('logging with invalid request', () => {
-  test('registered with ignored path and invalid injected', async () => {
+  test('injectec invalid url', async () => {
     const server = getServer()
     let resolver
     const done = new Promise((resolve, reject) => {
@@ -1473,18 +1473,11 @@ experiment('logging with invalid request', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        instance: logger,
-        ignorePaths: ['/ignored']
+        instance: logger
       }
     }
 
     await server.register(plugin)
-
-    await server.inject({
-      method: 'PUT',
-      url: '/ignored'
-    })
-
     await server.inject('invalid')
     await done
   })
