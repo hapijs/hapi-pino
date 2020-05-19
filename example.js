@@ -34,7 +34,7 @@ async function start () {
   })
 
   // as a decorated API
-  server.logger().info('another way for accessing it')
+  server.logger.info('another way for accessing it')
 
   // and through Hapi standard logging system
   server.log(['subsystem'], 'third way for accessing it')
