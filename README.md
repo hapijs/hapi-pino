@@ -24,9 +24,7 @@ npm install hapi-pino
 ```js
 'use strict'
 
-require('make-promises-safe')
-
-const Hapi = require('hapi')
+const Hapi = require('@hapi/hapi')
 
 async function start () {
   // Create a server with a host and port
@@ -51,7 +49,7 @@ async function start () {
   })
 
   await server.register({
-    plugin: require('.'),
+    plugin: require('hapi-pino'),
     options: {
       prettyPrint: process.env.NODE_ENV !== 'production',
       // Redact Authorization headers, see https://getpino.io/#/docs/redaction
