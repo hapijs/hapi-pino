@@ -30,7 +30,8 @@ async function start () {
   // Create a server with a host and port
   const server = Hapi.server({
     host: 'localhost',
-    port: 3000
+    port: 3000,
+    debug: false, // disable Hapi debug console logging
   })
 
   // Add the route
