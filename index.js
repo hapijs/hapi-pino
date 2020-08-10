@@ -174,7 +174,7 @@ async function register (server, options) {
   function isLoggingIgnored (options, request) {
     // note: from hapi@18.0.0 the `request.url` can be undefined
     // based on that we prefer to use request.path instead of request.url.pathname
-    if (options.ignorePaths && request.path && ignoreTable[request.path]) {
+    if (options.ignorePaths && ignoreTable[request.path]) {
       return true
     }
 

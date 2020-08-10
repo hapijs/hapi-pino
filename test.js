@@ -1459,14 +1459,16 @@ experiment('logging with request payload', () => {
 })
 
 experiment('logging with invalid request', () => {
-  test('registered with ignored path and invalid injected', async () => {
+  test('registered with ignored path and invalid URL injected', async () => {
     const server = getServer()
     let resolver
     const done = new Promise((resolve, reject) => {
       resolver = resolve
     })
     const stream = sink(data => {
-      expect(data.req.url).to.be.undefined()
+      // invalid URL should be a bad request
+      // because the URL is invalid
+      expect(data.res.statusCode).to.be.equal(400)
       resolver()
     })
     const logger = require('pino')(stream)
@@ -1481,11 +1483,45 @@ experiment('logging with invalid request', () => {
     await server.register(plugin)
 
     await server.inject({
-      method: 'PUT',
+      method: 'GET',
       url: '/ignored'
     })
 
     await server.inject('invalid')
+    await done
+  })
+  test('registered with ignored path and a valid URL injected', async () => {
+    const server = getServer()
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+    const stream = sink(data => {
+      // valid URL should be not found
+      // because the URL does not exist
+      expect(data.res.statusCode).to.be.equal(404)
+      resolver()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        ignorePaths: ['/ignored']
+      }
+    }
+
+    await server.register(plugin)
+
+    await server.inject({
+      method: 'GET',
+      url: '/ignored'
+    })
+
+    await server.inject({
+      method: 'GET',
+      url: '/valid'
+    })
     await done
   })
 })
