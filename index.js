@@ -15,6 +15,11 @@ const levelTags = {
   error: 'error'
 }
 
+let ignoredEventTags = {
+  log: '*',
+  request: '*'
+}
+
 async function register (server, options) {
   // clone all user options to account for internal mutations, except for existing stream and pino instances
   options = Object.assign(Hoek.clone(options), {
@@ -66,6 +71,10 @@ async function register (server, options) {
     }
   }
 
+  if (options.ignoredEventTags) {
+    ignoredEventTags = { ...ignoredEventTags, ...options.ignoredEventTags }
+  }
+
   const mergeHapiLogData = options.mergeHapiLogData
   const getChildBindings = options.getChildBindings ? options.getChildBindings : (request) => ({ req: request })
   const shouldLogRequestStart = typeof options.logRequestStart === 'function'
@@ -104,7 +113,7 @@ async function register (server, options) {
   server.events.on('log', function (event) {
     if (event.error) {
       logger.error({ err: event.error })
-    } else {
+    } else if (!isCustomTagsLoggingIgnored(event, ignoredEventTags.log)) {
       logEvent(logger, event)
     }
   })
@@ -131,7 +140,7 @@ async function register (server, options) {
         },
         'request error'
       )
-    } else if (event.channel === 'app') {
+    } else if (event.channel === 'app' && !isCustomTagsLoggingIgnored(event, ignoredEventTags.request)) {
       logEvent(request.logger, event)
     }
   })
@@ -170,6 +179,13 @@ async function register (server, options) {
   tryAddEvent(server, options, 'ext', 'onPostStop', async function (s) {
     logger.info(server.info, 'server stopped')
   })
+
+  function isCustomTagsLoggingIgnored (event, ignoredTags) {
+    if (event.tags && ignoredTags !== '*') {
+      return event.tags.some(tag => ignoredTags.indexOf(tag) > -1)
+    }
+    return false
+  }
 
   function isLoggingIgnored (options, request) {
     if (typeof options.ignoreFunc === 'function') {
