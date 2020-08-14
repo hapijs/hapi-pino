@@ -234,6 +234,20 @@ events"](#hapievents) section.
 
   (where `myIgnorePaths` would be an array with paths to be ignored).
 
+
+### `options.ignoredEventTags: object[]`
+  Takes an array of object tags and disables logging for each.  Useful for debug logs or any other tags that does not need logging.
+
+  **Default**: `{ log: '*', request: '*' }`, Logs all the events emitted by server.log and request.log without filtering event tags
+
+  **Example**: 
+  Do not log the events for DEBUG and TEST tag
+  ```js
+  ignoredEventTags: { log: ['DEBUG', 'TEST'], request: ['DEBUG', 'TEST'] }
+  server.log(['DEBUG'], 'DEBUG')
+  ```
+
+
 ### `options.level: Pino.Level`
   **Default**: `'info'`
 
