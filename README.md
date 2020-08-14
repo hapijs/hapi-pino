@@ -217,6 +217,23 @@ events"](#hapievents) section.
   ignoreTags: ['healthcheck']
   ```
 
+### `options.ignoreFunc: (options, request) => boolean`
+  Takes a function that receives the plugin options and the request as parameters, and returns a boolean. Logging will be disabled if the return value is `true`. Useful for scenarios where the `ignorePaths` or `ignoreTags` options can't achieve what is intended.
+
+  **Example**:
+  Do not log routes relative to static content
+  ```js
+  ignoreFunc: (options, request) => request.path.startsWith('/static')
+  ```
+
+  **Note**: if `ignoreFunc` is used, the other two options that can be used to ignore / disable logging (`ignorePaths` and `ignoreTags`) are effectively discarded. So `ignoreFunc` can be seen a more advanced option. For instance, you can easily re-implement the `ignorePaths` functionality as follows:
+
+  ```js
+  ignoreFunc: (options, request) => myIgnorePaths.include(request.path)
+  ```
+
+  (where `myIgnorePaths` would be an array with paths to be ignored).
+
 ### `options.level: Pino.Level`
   **Default**: `'info'`
 
