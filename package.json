@@ -19,8 +19,8 @@
   "license": "MIT",
   "devDependencies": {
     "@hapi/code": "^8.0.0",
-    "@hapi/hapi": "^19.0.0",
-    "@hapi/lab": "^22.0.0",
+    "@hapi/hapi": "^20.0.0",
+    "@hapi/lab": "^23.0.0",
     "coveralls": "^3.0.11",
     "flush-write-stream": "^2.0.0",
     "make-promises-safe": "^5.1.0",

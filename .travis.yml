@@ -6,10 +6,13 @@ node_js:
 env:
   - HAPI=@hapi/hapi@18
   - HAPI=@hapi/hapi@19
+  - HAPI=@hapi/hapi@20
 matrix:
   exclude:
   - node_js: 10
     env: HAPI=@hapi/hapi@19
+  - node_js: 10
+    env: HAPI=@hapi/hapi@20
 before_script:
   - npm install --save-dev $HAPI
 after_script:
