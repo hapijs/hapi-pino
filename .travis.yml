@@ -6,7 +6,7 @@ node_js:
 env:
   - HAPI=@hapi/hapi@18
   - HAPI=@hapi/hapi@19
-  - HAPe=@hapi/hapi@20
+  - HAPI=@hapi/hapi@20
 matrix:
   exclude:
   - node_js: 10
