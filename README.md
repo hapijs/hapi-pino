@@ -93,6 +93,11 @@ events"](#hapievents) section.
 
   When enabled, add the request payload as `payload` to the `response` event log.
 
+### `options.logQueryParams: boolean`
+
+  **Default**: `false`
+
+  When enabled, add the request query as `queryParams` to the `response` event log.
 
 ### `options.logRouteTags: boolean`
 
