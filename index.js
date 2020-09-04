@@ -160,6 +160,7 @@ async function register (server, options) {
       request.logger.info(
         {
           payload: options.logPayload ? request.payload : undefined,
+          queryParams: options.logQueryParams ? request.query : undefined,
           tags: options.logRouteTags ? request.route.settings.tags : undefined,
           // note: pino doesnt support unsetting a key, so this next line
           // has the effect of setting it or "leaving it as it was" if it was already added via child bindings

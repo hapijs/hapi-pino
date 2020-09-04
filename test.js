@@ -2064,3 +2064,34 @@ experiment('ignore the log event triggered by request.log and server.log', () =>
     expect(called).to.be.false()
   })
 })
+
+experiment('logging with request queryParams', () => {
+  test('with pre-defined req serializer', async () => {
+    const server = getServer()
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+    const stream = sink(data => {
+      expect(data.queryParams).to.equal({ foo: '42', bar: '43' })
+      resolver()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        logQueryParams: true
+      }
+    }
+
+    await server.register(plugin)
+
+    await server.inject({
+      method: 'POST',
+      url: '/?foo=42&bar=43'
+    })
+
+    await done
+  })
+})
