@@ -76,7 +76,7 @@ async function register (server, options) {
   }
 
   const mergeHapiLogData = options.mergeHapiLogData
-  const customAttributeKeys = options.customAttributeKeys || {} 
+  const customAttributeKeys = options.customAttributeKeys || {}
   const reqKey = customAttributeKeys.req || 'req'
   const resKey = customAttributeKeys.res || 'res'
 
