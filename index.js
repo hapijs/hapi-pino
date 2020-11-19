@@ -76,7 +76,11 @@ async function register (server, options) {
   }
 
   const mergeHapiLogData = options.mergeHapiLogData
-  const getChildBindings = options.getChildBindings ? options.getChildBindings : (request) => ({ req: request })
+  const customAttributeKeys = options.customAttributeKeys || {} 
+  const reqKey = customAttributeKeys.req || 'req'
+  const resKey = customAttributeKeys.res || 'res'
+
+  const getChildBindings = options.getChildBindings ? options.getChildBindings : (request) => ({ [reqKey]: request })
   const shouldLogRequestStart = typeof options.logRequestStart === 'function'
     ? (request) => options.logRequestStart(request)
     : typeof options.logRequestStart === 'boolean'
@@ -103,7 +107,7 @@ async function register (server, options) {
 
     if (shouldLogRequestStart(request)) {
       request.logger.info({
-        req: request
+        [reqKey]: request
       }, 'request start')
     }
 
@@ -164,8 +168,8 @@ async function register (server, options) {
           tags: options.logRouteTags ? request.route.settings.tags : undefined,
           // note: pino doesnt support unsetting a key, so this next line
           // has the effect of setting it or "leaving it as it was" if it was already added via child bindings
-          req: shouldLogRequestStart(request) ? undefined : request,
-          res: request.raw.res,
+          [reqKey]: shouldLogRequestStart(request) ? undefined : request,
+          [resKey]: request.raw.res,
           responseTime: (info.completed !== undefined ? info.completed : info.responded) - info.received
         },
         'request completed'
