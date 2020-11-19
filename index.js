@@ -168,7 +168,7 @@ async function register (server, options) {
           res: request.raw.res,
           responseTime: (info.completed !== undefined ? info.completed : info.responded) - info.received
         },
-        'request completed'
+        options.customSuccessMessage || 'request completed'
       )
     }
   })

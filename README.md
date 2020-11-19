@@ -268,6 +268,10 @@ events"](#hapievents) section.
 
   Path to be redacted in the log lines. See the [log redaction](https://getpino.io/#/docs/redaction) docs for more details.
 
+### `options.customSuccessMessage: string`
+
+  Override the default "request completed" message logged when a request completes.
+
 <a name="serverdecorations"></a>
 ### Server Decorations
 
