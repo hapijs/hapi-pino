@@ -6,13 +6,13 @@ const { stdSerializers } = pino
 const serializersSym = Symbol.for('pino.serializers')
 const nullLogger = require('abstract-logging')
 
-const levels = ['trace', 'debug', 'info', 'warn', 'error']
 const levelTags = {
   trace: 'trace',
   debug: 'debug',
   info: 'info',
   warn: 'warn',
-  error: 'error'
+  error: 'error',
+  fatal: 'fatal'
 }
 
 let ignoredEventTags = {
@@ -51,6 +51,7 @@ async function register (server, options) {
     logger = pino(options, stream)
   }
 
+  const levels = Object.keys(logger.levels.values)
   const tagToLevels = Object.assign({}, levelTags, options.tags)
   const allTags = options.allTags || 'info'
 
