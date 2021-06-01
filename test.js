@@ -203,6 +203,15 @@ experiment('logs each request', () => {
       done = resolve
     })
 
+    server.route({
+      path: '/',
+      method: 'GET',
+      handler: async (req, h) => {
+        await sleep(10)
+        return 'hello world'
+      }
+    })
+
     await registerWithSink(server, 'info', data => {
       expect(data.res.statusCode).to.equal(200)
       expect(data.msg).to.equal('request completed')
@@ -214,7 +223,7 @@ experiment('logs each request', () => {
 
     server.inject({
       url: '/',
-      method: 'POST',
+      method: 'GET',
       simulate: {
         close: true
       }
