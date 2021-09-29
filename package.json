@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "coverage": "lab test.js -c",
+    "coverage:lcov": "lab test.js -r lcov -o coverage/lcov.info",
     "coveralls": "lab test.js -r lcov | coveralls",
     "test": "standard && lab --timeout 100000 test.js"
   },
