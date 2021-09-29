@@ -31,4 +31,20 @@ jobs:
         node-version: ${{ matrix.node }}
     - run: npm install
     - run: npm install ${{ matrix.hapi }}
-    - run: npm run coveralls
+    - run: npm run coverage:lcov
+    - name: Coveralls Parallel
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        flag-name: run-${{ matrix.node }}-${{ matrix.hapi }}
+        parallel: true
+
+  finish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        parallel-finished: true
