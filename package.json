@@ -1,10 +1,11 @@
 {
   "name": "hapi-pino",
-  "version": "8.3.0",
+  "version": "8.4.0",
   "description": "Hapi plugin for the Pino logger ",
   "main": "index.js",
   "scripts": {
     "coverage": "lab test.js -c",
+    "coverage:lcov": "lab test.js -r lcov -o coverage/lcov.info",
     "coveralls": "lab test.js -r lcov | coveralls",
     "test": "standard && lab --timeout 100000 test.js"
   },

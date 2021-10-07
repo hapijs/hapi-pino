@@ -77,6 +77,7 @@ async function register (server, options) {
   }
 
   const mergeHapiLogData = options.mergeHapiLogData
+  const messageKey = options.messageKey || 'msg'
   const getChildBindings = options.getChildBindings ? options.getChildBindings : (request) => ({ req: request })
   const shouldLogRequestStart = typeof options.logRequestStart === 'function'
     ? (request) => options.logRequestStart(request)
@@ -245,7 +246,7 @@ async function register (server, options) {
     var logObject
     if (mergeHapiLogData) {
       if (typeof data === 'string') {
-        data = { msg: data }
+        data = { [messageKey]: data }
       }
 
       logObject = Object.assign({ tags }, data)

@@ -203,6 +203,15 @@ experiment('logs each request', () => {
       done = resolve
     })
 
+    server.route({
+      path: '/',
+      method: 'GET',
+      handler: async (req, h) => {
+        await sleep(10)
+        return 'hello world'
+      }
+    })
+
     await registerWithSink(server, 'info', data => {
       expect(data.res.statusCode).to.equal(200)
       expect(data.msg).to.equal('request completed')
@@ -214,7 +223,7 @@ experiment('logs each request', () => {
 
     server.inject({
       url: '/',
-      method: 'POST',
+      method: 'GET',
       simulate: {
         close: true
       }
@@ -1287,6 +1296,31 @@ experiment('logging with mergeHapiLogData option enabled', () => {
         stream: stream,
         level: 'info',
         mergeHapiLogData: true
+      }
+    }
+
+    await server.register(plugin)
+    server.log(['info'], 'hello world')
+    await finish
+  })
+
+  test('respects `messageKey` option', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    const stream = sink(data => {
+      expect(data).to.include({ message: 'hello world' })
+      done()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info',
+        mergeHapiLogData: true,
+        messageKey: 'message'
       }
     }
 
