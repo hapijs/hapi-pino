@@ -528,6 +528,34 @@ experiment('logs through server.log', () => {
     server.log(['something'], 'hello world')
     await finish
   })
+
+  test('allow tags to point to a custom level defined in pino\'s customLevels', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    const stream = sink(data => {
+      expect(data.level).to.equal(123)
+      done()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        customLevels: {
+          bar: 123
+        },
+        tags: {
+          foo: 'bar'
+        }
+      }
+    }
+    await server.register(plugin)
+
+    server.log(['foo'], 'hello world')
+    await finish
+  })
 })
 
 experiment('logs through request.log', () => {
