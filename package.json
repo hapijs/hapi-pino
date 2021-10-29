@@ -32,7 +32,7 @@
   "dependencies": {
     "@hapi/hoek": "^9.0.0",
     "abstract-logging": "^2.0.0",
-    "pino": "^6.0.0",
+    "pino": "^7.0.0",
     "pino-pretty": "^4.0.0"
   },
   "repository": {
