@@ -21,7 +21,7 @@
   "devDependencies": {
     "@hapi/code": "^8.0.0",
     "@hapi/hapi": "^20.0.0",
-    "@hapi/lab": "^23.0.0",
+    "@hapi/lab": "^24.3.2",
     "coveralls": "^3.0.11",
     "flush-write-stream": "^2.0.0",
     "make-promises-safe": "^5.1.0",
