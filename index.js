@@ -5,6 +5,7 @@ const pino = require('pino')
 const { stdSerializers } = pino
 const serializersSym = Symbol.for('pino.serializers')
 const nullLogger = require('abstract-logging')
+const getCallerFile = require('get-caller-file')
 
 const levelTags = {
   trace: 'trace',
@@ -46,6 +47,9 @@ async function register (server, options) {
       logger[serializersSym].err = options.serializers.err
     }
   } else {
+    if (options.transport && !options.transport.caller) {
+      options.transport.caller = getCallerFile()
+    }
     options.stream = options.stream || process.stdout
     var stream = options.stream || process.stdout
     logger = pino(options, stream)
