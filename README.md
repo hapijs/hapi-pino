@@ -6,7 +6,8 @@ post-processing.
 
 ## Supported Hapi versions
 
-- hapi-pino v7.x and v8.x supports Hapi v18 and v19.
+- hapi-pino v8.x supports Hapi v20. (Known to work on v18 and v19, not tested anymore.)
+- hapi-pino v7.x supports Hapi v18 and v19.
 - hapi-pino v6.x supports Hapi v17, v18 and v19
 - hapi-pino v5.x supports Hapi v17 and v18
 - hapi-pino v3.x

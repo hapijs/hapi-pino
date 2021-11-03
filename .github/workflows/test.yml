@@ -15,13 +15,8 @@ jobs:
 
     strategy:
       matrix:
-        node: [10, 12, 14]
-        hapi: ["@hapi/hapi@18", "@hapi/hapi@19", "@hapi/hapi@20"]
-        exclude:
-        - node: 10
-          hapi: "@hapi/hapi@19"
-        - node: 10
-          hapi: "@hapi/hapi@20"
+        node: [12, 14, 16]
+        hapi: ["@hapi/hapi@20"]
 
     steps:
     - uses: actions/checkout@v2
