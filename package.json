@@ -8,7 +8,8 @@
     "coverage": "lab test.js -c",
     "coverage:lcov": "lab test.js -r lcov -o coverage/lcov.info",
     "coveralls": "lab test.js -r lcov | coveralls",
-    "test": "standard && lab --timeout 100000 test.js"
+    "test": "standard && lab --timeout 100000 test.js",
+    "test-types": "tsd"
   },
   "keywords": [
     "hapi",
@@ -28,10 +29,12 @@
     "make-promises-safe": "^5.1.0",
     "pre-commit": "^1.2.2",
     "split2": "^3.1.1",
-    "standard": "^14.3.3"
+    "standard": "^14.3.3",
+    "tsd": "^0.18.0"
   },
   "dependencies": {
     "@hapi/hoek": "^9.0.0",
+    "@types/hapi__hapi": "^20.0.9",
     "abstract-logging": "^2.0.0",
     "get-caller-file": "^2.0.5",
     "pino": "^7.0.0",
