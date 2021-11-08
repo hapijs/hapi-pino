@@ -51,6 +51,9 @@ declare namespace HapiPino {
     ignorePaths?: string[] | undefined;
     level?: pino.Level | undefined;
     redact?: string[] | pino.redactOptions | undefined;
+    ignoreTags?: string[] | undefined;
+    ignoreFunc?: ((options: Options, request: Request) => boolean) | undefined;
+    ignoredEventTags?: object[] | undefined;
   }
 }
 
