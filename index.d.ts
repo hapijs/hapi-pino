@@ -11,6 +11,16 @@ import type { pino } from 'pino';
 
 import { Plugin, Request } from '@hapi/hapi';
 
+declare module '@hapi/hapi' {
+  interface Server {
+    logger: pino.Logger;
+  }
+
+  interface Request {
+    logger: pino.Logger;
+  }
+}
+
 declare namespace HapiPino {
   interface Serializers {
     [key: string]: pino.SerializerFn;
