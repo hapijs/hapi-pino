@@ -426,6 +426,7 @@ experiment('logs through server.log', () => {
     })
 
     await tagsWithSink(server, {}, data => {
+      expect(data.tags).to.equal(['error', 'tag'])
       expect(data.err.type).to.equal('Error')
       expect(data.err.message).to.equal('foobar')
       expect(data.err.stack).to.exist()
@@ -434,7 +435,7 @@ experiment('logs through server.log', () => {
       resolver()
     })
 
-    server.log(['error'], new Error('foobar'))
+    server.log(['error', 'tag'], new Error('foobar'))
     await done
   })
 
@@ -588,6 +589,37 @@ experiment('logs through request.log', () => {
         cb()
       }
     )
+
+    await server.inject('/')
+    await done
+  })
+
+  test('with logged error object', async () => {
+    const server = getServer()
+    server.route({
+      path: '/',
+      method: 'GET',
+      handler: (req, h) => {
+        req.log(['error', 'tag'], new Error('foobar'))
+        return 'hello world'
+      }
+    })
+
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+
+    await tagsWithSink(server, {}, (data) => {
+      expect(data.tags).to.equal(['error', 'tag'])
+      expect(data.err.type).to.equal('Error')
+      expect(data.err.message).to.equal('foobar')
+      expect(data.err.stack).to.exist()
+      // highest level tag
+      expect(data.level).to.equal(50)
+
+      resolver()
+    })
 
     await server.inject('/')
     await done
