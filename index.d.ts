@@ -1,10 +1,3 @@
-// Type definitions for hapi-pino 9.0
-// Definitions by: Rodrigo Saboya <https://github.com/saboya>
-//                 Todd Bealmear <https://github.com/todd>
-//                 Matt Jeanes <https://github.com/BlooJeans>
-//                 Kyle Gray <https://github.com/GoPro16>
-// TypeScript Version: 2.8
-
 /// <reference types='node' />
 
 import type { pino } from 'pino';
@@ -22,38 +15,29 @@ declare module '@hapi/hapi' {
 }
 
 declare namespace HapiPino {
-  interface Serializers {
-    [key: string]: pino.SerializerFn;
-  }
-
-  interface Options {
+  interface Options extends pino.LoggerOptions {
     timestamp?: boolean | (() => string) | undefined;
     logQueryParams?: boolean | undefined;
     logPayload?: boolean | undefined;
     logRouteTags?: boolean | undefined;
     logRequestStart?: boolean | ((req: Request) => boolean) | undefined;
     logRequestComplete?: boolean | ((req: Request) => boolean) | undefined;
-    stream?: NodeJS.WriteStream | undefined;
-    prettyPrint?: boolean | pino.PrettyOptions | undefined;
     tags?: { [key in pino.Level]?: string } | undefined;
+    stream?: NodeJS.WriteStream | undefined;
     allTags?: pino.Level | undefined;
-    serializers?: Serializers | undefined;
-    getChildBindings?:
-      | ((req: Request) => {
-          level?: pino.Level | string | undefined;
-          serializers?: Serializers | undefined;
-          [key: string]: any;
-        })
-      | undefined;
     instance?: pino.Logger | undefined;
     logEvents?: string[] | false | null | undefined;
     mergeHapiLogData?: boolean | undefined;
     ignorePaths?: string[] | undefined;
-    level?: pino.Level | undefined;
-    redact?: string[] | pino.redactOptions | undefined;
     ignoreTags?: string[] | undefined;
     ignoreFunc?: ((options: Options, request: Request) => boolean) | undefined;
     ignoredEventTags?: object[] | undefined;
+    getChildBindings?:
+      | ((req: Request) => {
+          level?: pino.Level | string | undefined;
+          [key: string]: any;
+        })
+      | undefined;
   }
 }
 
