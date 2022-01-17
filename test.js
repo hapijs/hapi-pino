@@ -2087,6 +2087,45 @@ experiment('log redact', () => {
 })
 
 experiment('ignore the log event triggered by request.log and server.log', () => {
+  test('Review ignoredEventTags before process events logs', async () => {
+    const server = Hapi.server({ port: 0 })
+    let called = true
+    const stream = sink(() => {
+      called = false
+    })
+
+    server.route({
+      path: '/foo',
+      method: 'GET',
+      handler: (req, h) => {
+        req.log(['TEST'], 'even im not getting logged')
+        return 'foo'
+      }
+    })
+    const logger = require('pino')(stream)
+
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        logRequestComplete: false,
+        ignoredEventTags: {
+          log: ['test'],
+          request: ['*']
+        }
+      }
+    }
+
+    await server.register(plugin)
+    server.log(['test'], 'im not getting logged')
+
+    await server.inject({
+      method: 'GET',
+      url: '/foo'
+    })
+    expect(called).to.be.false()
+  })
+
   test('do not log events to console if the event tags are included in ignoredEventTags', async () => {
     const server = Hapi.server({ port: 0 })
     let called = false
