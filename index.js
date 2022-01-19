@@ -144,6 +144,7 @@ async function register (server, options) {
     if (event.error && isEnabledLogEvent(options, 'request-error')) {
       request.logger.error(
         {
+          tags: event.tags,
           err: event.error
         },
         'request error'
