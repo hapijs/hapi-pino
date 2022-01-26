@@ -117,10 +117,12 @@ async function register (server, options) {
   })
 
   server.events.on('log', function (event) {
-    if (event.error) {
-      logger.error({ tags: event.tags, err: event.error })
-    } else if (!isCustomTagsLoggingIgnored(event, ignoredEventTags.log)) {
-      logEvent(logger, event)
+    if (!isCustomTagsLoggingIgnored(event, ignoredEventTags.log)) { // first check on ignoring tags
+      if (event.error) {
+        logger.error({ err: event.error })
+      } else {
+        logEvent(logger, event)
+      }
     }
   })
 

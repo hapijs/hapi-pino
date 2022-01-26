@@ -426,7 +426,6 @@ experiment('logs through server.log', () => {
     })
 
     await tagsWithSink(server, {}, data => {
-      expect(data.tags).to.equal(['error', 'tag'])
       expect(data.err.type).to.equal('Error')
       expect(data.err.message).to.equal('foobar')
       expect(data.err.stack).to.exist()
@@ -435,7 +434,7 @@ experiment('logs through server.log', () => {
       resolver()
     })
 
-    server.log(['error', 'tag'], new Error('foobar'))
+    server.log(['error'], new Error('foobar'))
     await done
   })
 
