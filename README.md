@@ -116,7 +116,7 @@ events"](#hapievents) section.
   For convenience, you can pass in `true` to always log `request start` events, or `false` to disable logging `request start` events
 
   Note: when `logRequestStart` is enabled and `getChildBindings` is configured to omit the `req` field, then the `req` field will be
-  omitted from the `request completed` log event. This behavior is useful if you want to separate requests from responses and link the
+  omitted from the `request completed` log event but the `req` field will always be there for the start log. This behavior is useful if you want to separate requests from responses and link the
   two via requestId (frequently done via `headers['x-request-id']`) , where "request start" only logs the request and a requestId,
   and `request completed` only logs the response and the requestId.
 
@@ -159,7 +159,8 @@ events"](#hapievents) section.
 
  **Example**:  
  To redact the authorization header in the logs:
-  ```
+
+  ```js
   {
     req: require('pino-noir')(['req.headers.authorization']).req
     res: ...
@@ -206,6 +207,8 @@ events"](#hapievents) section.
 
   Takes a function with the request as an input, and returns the object that will be passed into pinoLogger.child().
 
+  Note: Omitting `req` from the child bindings will omit it from all logs, most notably the response log, except "request start".
+
 ### `options.ignorePaths: string[]`
   Takes an array of string routes and disables logging for each.  Useful for health checks or any route that does not need logging.
 
@@ -247,7 +250,7 @@ events"](#hapievents) section.
 
   **Default**: `{ log: '*', request: '*' }`, Logs all the events emitted by server.log and request.log without filtering event tags
 
-  **Example**: 
+  **Example**:
   Do not log the events for DEBUG and TEST tag
   ```js
   ignoredEventTags: { log: ['DEBUG', 'TEST'], request: ['DEBUG', 'TEST'] }
@@ -258,7 +261,7 @@ events"](#hapievents) section.
 ### `options.level: Pino.Level`
   **Default**: `'info'`
 
-  Set the minumum level that Pino should log out. See [Level](https://github.com/pinojs/pino/blob/master/docs/api.md#level).
+  Set the minimum level that Pino should log out. See [Level](https://github.com/pinojs/pino/blob/master/docs/api.md#level).
 
   **Example**:  
   Configure Pino to output all `debug` or higher events:
@@ -281,19 +284,19 @@ events"](#hapievents) section.
 
 **hapi-pino** decorates the Hapi request with:
 
-* `request.logger`, which is an instance of [pino][pino] bound to the current request, so you can trace all the logs of a given request. See [pino][pino] doc for the way to actual log.
+- `request.logger`, which is an instance of [pino][pino] bound to the current request, so you can trace all the logs of a given request. See [pino][pino] doc for the way to actual log.
 
 <a name="hapievents"></a>
 ### Hapi Events
 
 **hapi-pino** listens to some Hapi events:
 
-* `'onRequest'`, to create a request-specific child logger
-* `'response'`, to log at `'info'` level when a request is completed
-* `'request'`, to support logging via the Hapi `request.log()` method and to log at `'warn'` level when a request errors or when request received contains an invalid `accept-encoding` header, see `tags` and `allTags` options.
-* `'log'`, to support logging via the Hapi `server.log()` method and to log in case of an internal server event, see `tags` and `allTags` options.
-* `'onPostStart'`, to log when the server is started
-* `'onPostStop'`, to log when the server is stopped
+- `'onRequest'`, to create a request-specific child logger
+- `'response'`, to log at `'info'` level when a request is completed
+- `'request'`, to support logging via the Hapi `request.log()` method and to log at `'warn'` level when a request errors or when request received contains an invalid `accept-encoding` header, see `tags` and `allTags` options.
+- `'log'`, to support logging via the Hapi `server.log()` method and to log in case of an internal server event, see `tags` and `allTags` options.
+- `'onPostStart'`, to log when the server is started
+- `'onPostStop'`, to log when the server is stopped
 
 ## Acknowledgements
 
