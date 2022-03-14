@@ -166,6 +166,9 @@ async function register (server, options) {
         const childBindings = getChildBindings(request)
         request.logger = logger.child(childBindings)
       }
+
+      const responseTime = (info.completed !== undefined ? info.completed : info.responded) - info.received
+
       request.logger.info(
         {
           payload: options.logPayload ? request.payload : undefined,
@@ -175,9 +178,9 @@ async function register (server, options) {
           // has the effect of setting it or "leaving it as it was" if it was already added via child bindings
           req: shouldLogRequestStart(request) ? undefined : request,
           res: request.raw.res,
-          responseTime: (info.completed !== undefined ? info.completed : info.responded) - info.received
+          responseTime
         },
-        'request completed'
+        `[response] ${request.method} ${request.path} ${request.raw.res.statusCode} (${responseTime}ms)`
       )
     }
   })
