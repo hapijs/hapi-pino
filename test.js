@@ -49,7 +49,7 @@ function getServer () {
 }
 
 function sink (func) {
-  var result = split(JSON.parse)
+  const result = split(JSON.parse)
   result.pipe(writeStream.obj(func))
   return result
 }
@@ -155,7 +155,7 @@ experiment('logs each request', () => {
     await registerWithSink(server, 'info', data => {
       expect(data.req.id).to.exists()
       expect(data.res.statusCode).to.equal(200)
-      expect(data.msg).to.equal('request completed')
+      expect(data.msg).to.match(/get \/something 200 \(\d*ms\)/)
       expect(data.responseTime).to.be.at.least(0)
       done()
     })
@@ -215,7 +215,7 @@ experiment('logs each request', () => {
 
     await registerWithSink(server, 'info', data => {
       expect(data.res.statusCode).to.equal(200)
-      expect(data.msg).to.equal('request completed')
+      expect(data.msg).to.match(/\[response\] get \/ 200 \(\d*ms\)/)
       expect(data.responseTime).to.be.at.least(10)
       done()
     })
@@ -244,7 +244,7 @@ experiment('logs each request', () => {
 
     await registerWithSink(server, 'info', data => {
       expect(data.res.statusCode).to.equal(200)
-      expect(data.msg).to.equal('request completed')
+      expect(data.msg).to.match(/\[response\] get \/ 200 \(\d*ms\)/)
       expect(data.responseTime)
         .to.be.a.number()
         .greaterThan(0)
@@ -277,7 +277,7 @@ experiment('logs each request', () => {
     })
     await registerWithSink(server, 'info', (data, enc, cb) => {
       expect(data.res.statusCode).to.equal(200)
-      expect(data.msg).to.equal('request completed')
+      expect(data.msg).to.match(/\[response\] get \/ 200 \(\d*ms\)/)
       cb()
       done()
     })
@@ -307,7 +307,7 @@ experiment('logs each request', () => {
       } else {
         expect(data.res.statusCode).to.equal(500)
         expect(data.level).to.equal(30)
-        expect(data.msg).to.equal('request completed')
+        expect(data.msg).to.match(/get \/ 500 \(\d*ms\)/)
         done()
       }
       count++
@@ -359,7 +359,7 @@ experiment('logs each request', () => {
         expect(data.msg).to.equal('hello logger')
       } else {
         expect(data.res.statusCode).to.equal(200)
-        expect(data.msg).to.equal('request completed')
+        expect(data.msg).to.match(/get \/ 200 \(\d*ms\)/)
         done()
       }
       count++
@@ -416,7 +416,7 @@ experiment('logs each request', () => {
 
     await registerWithSink(server, 'info', data => {
       expect(data.res.statusCode).to.equal(200)
-      expect(data.msg).to.equal('request completed')
+      expect(data.msg).to.match(/\[response\] get \/ 200 \(\d*ms\)/)
       done()
     })
 
@@ -966,7 +966,7 @@ experiment('options.logRequestStart', () => {
     })
 
     const stream = sink(data => {
-      expect(data.msg).to.equal('request completed')
+      expect(data.msg).to.match(/\[response\] get \/something 200 \(\d*ms\)/)
       expect(data.req).to.be.an.object()
       expect(data.req.id).to.exists()
       expect(data.res).to.be.an.object()
@@ -993,7 +993,7 @@ experiment('options.logRequestStart', () => {
     })
 
     const stream = sink(data => {
-      expect(data.msg).to.equal('request completed')
+      expect(data.msg).to.match(/\[response\] get \/something 200 \(\d*ms\)/)
       expect(data.req).to.be.an.object()
       expect(data.req.id).to.exists()
       expect(data.res).to.be.an.object()
@@ -1064,13 +1064,13 @@ experiment('options.logRequestStart', () => {
     const stream = sink((data, enc, cb) => {
       if (count === 0) {
         expect(data.req.url).to.endWith('/ignored')
-        expect(data.msg).to.equal('request completed')
+        expect(data.msg).to.match(/\[response\] get \/ignored 200 \(\d*ms\)/)
       } else if (count === 1) {
         expect(data.req.url).to.endWith('/foo')
         expect(data.msg).to.equal('request start')
       } else {
         expect(data.req.url).to.endWith('/foo')
-        expect(data.msg).to.equal('request completed')
+        expect(data.msg).to.match(/\[response\] get \/foo 200 \(\d*ms\)/)
         done()
       }
       count++
@@ -1114,7 +1114,7 @@ experiment('options.logRequestStart', () => {
         expect(data.req).to.be.an.object()
         expect(data.res).to.be.undefined()
       } else {
-        expect(data.msg).to.equal('request completed')
+        expect(data.msg).to.match(/\[response\] get \/something 200 \(\d*ms\)/)
         expect(data.req).to.be.an.object()
         expect(data.res).to.be.an.object()
         done()
@@ -1150,7 +1150,7 @@ experiment('options.logRequestStart', () => {
         expect(data.res).to.be.undefined()
         expect(data.requestId).to.equal('request1234')
       } else {
-        expect(data.msg).to.equal('request completed')
+        expect(data.msg).to.match(/\[response\] get \/something 200 \(\d*ms\)/)
         expect(data.req).to.be.undefined()
         expect(data.res).to.be.an.object()
         expect(data.requestId).to.equal('request1234')
@@ -1220,7 +1220,7 @@ experiment('options.logRequestComplete', () => {
     })
 
     const stream = sink(data => {
-      expect(data.msg).to.equal('request completed')
+      expect(data.msg).to.match(/\[response\] get \/something 200 \(\d*ms\)/)
       expect(data.req).to.be.an.object()
       expect(data.req.id).to.exists()
       expect(data.res).to.be.an.object()
@@ -1247,7 +1247,7 @@ experiment('options.logRequestComplete', () => {
     })
 
     const stream = sink(data => {
-      expect(data.msg).to.equal('request completed')
+      expect(data.msg).to.match(/\[response\] get \/something 200 \(\d*ms\)/)
       expect(data.req).to.be.an.object()
       expect(data.req.id).to.exists()
       expect(data.res).to.be.an.object()
@@ -1325,7 +1325,7 @@ experiment('options.logRequestComplete', () => {
     })
     const stream = sink((data, enc, cb) => {
       expect(data.req.url).to.endWith('/foo')
-      expect(data.msg).to.equal('request completed')
+      expect(data.msg).to.match(/\[response\] get \/foo 200 \(\d*ms\)/)
       done()
     })
     const logger = require('pino')(stream)
@@ -1400,6 +1400,30 @@ experiment('logging with mergeHapiLogData option enabled', () => {
 
     await server.register(plugin)
     server.log(['info'], 'hello world')
+    await finish
+  })
+
+  test('when data is a number, merge it as msg property', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    const stream = sink(data => {
+      expect(data).to.include({ msg: 1 })
+      done()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info',
+        mergeHapiLogData: true
+      }
+    }
+
+    await server.register(plugin)
+    server.log(['info'], 1)
     await finish
   })
 
@@ -1807,7 +1831,7 @@ experiment('ignore response logs for paths in ignorePaths', () => {
     })
     const stream = sink(data => {
       expect(data.req.url).to.endWith('/foo')
-      expect(data.msg).to.equal('request completed')
+      expect(data.msg).to.match(/\[response\] put \/foo 404 \(\d*ms\)/)
       resolver()
     })
     const logger = require('pino')(stream)
@@ -1844,7 +1868,7 @@ experiment('ignore response logs for tags in ignoreTags', () => {
     })
     const stream = sink(data => {
       expect(data.req.url).to.endWith('/foo')
-      expect(data.msg).to.equal('request completed')
+      expect(data.msg).to.match(/\[response\] put \/foo 404 \(\d*ms\)/)
       resolver()
     })
     const logger = require('pino')(stream)
@@ -1881,7 +1905,7 @@ experiment('ignore response logs with ignoreFunc', () => {
     })
     const stream = sink(data => {
       expect(data.req.url).to.endWith('/foo')
-      expect(data.msg).to.equal('request completed')
+      expect(data.msg).to.match(/\[response\] put \/foo 404 \(\d*ms\)/)
       resolver()
     })
     const logger = require('pino')(stream)

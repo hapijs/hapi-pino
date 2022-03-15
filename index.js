@@ -37,7 +37,7 @@ async function register (server, options) {
     options.logEvents = ['onPostStart', 'onPostStop', 'response', 'request-error']
   }
 
-  var logger
+  let logger
   if (options.instance) {
     logger = options.instance
     const overrideDefaultErrorSerializer =
@@ -51,7 +51,7 @@ async function register (server, options) {
       options.transport.caller = getCallerFile()
     }
     options.stream = options.stream || process.stdout
-    var stream = options.stream || process.stdout
+    const stream = options.stream || process.stdout
     logger = pino(options, stream)
   }
 
@@ -69,7 +69,7 @@ async function register (server, options) {
     tagToLevelValue[tag] = logger.levels.values[tagToLevels[tag]]
   }
 
-  var ignoreTable = {}
+  const ignoreTable = {}
   if (options.ignorePaths) {
     for (let i = 0; i < options.ignorePaths.length; i++) {
       ignoreTable[options.ignorePaths[i]] = true
@@ -168,15 +168,16 @@ async function register (server, options) {
       }
 
       // If you want `req` to be added either use the default `getChildBindings` or make sure `req` is passed in your custom bindings.
+      const responseTime = (info.completed !== undefined ? info.completed : info.responded) - info.received
       request.logger.info(
         {
           payload: options.logPayload ? request.payload : undefined,
           queryParams: options.logQueryParams ? request.query : undefined,
           tags: options.logRouteTags ? request.route.settings.tags : undefined,
           res: request.raw.res,
-          responseTime: (info.completed !== undefined ? info.completed : info.responded) - info.received
+          responseTime
         },
-        'request completed'
+        `[response] ${request.method} ${request.path} ${request.raw.res.statusCode} (${responseTime}ms)`
       )
     }
   })
@@ -214,7 +215,7 @@ async function register (server, options) {
       return false
     }
 
-    for (var index = ignoreTags.length; index >= 0; index--) {
+    for (let index = ignoreTags.length; index >= 0; index--) {
       if (routeTags.includes(ignoreTags[index])) {
         return true
       }
@@ -228,7 +229,7 @@ async function register (server, options) {
   }
 
   function tryAddEvent (server, options, type, event, cb) {
-    var name = typeof event === 'string' ? event : event.name
+    const name = typeof event === 'string' ? event : event.name
     if (isEnabledLogEvent(options, name)) {
       if (type === 'on') {
         server.events.on(event, cb)
@@ -246,12 +247,12 @@ async function register (server, options) {
       return
     }
 
-    var tags = event.tags
-    var data = event.data
+    const tags = event.tags
+    let data = event.data
 
-    var logObject
+    let logObject
     if (mergeHapiLogData) {
-      if (typeof data === 'string') {
+      if (typeof data === 'string' || typeof data === 'number') {
         data = { [messageKey]: data }
       }
 
