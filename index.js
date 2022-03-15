@@ -252,7 +252,7 @@ async function register (server, options) {
 
     var logObject
     if (mergeHapiLogData) {
-      if (typeof data === 'string') {
+      if (typeof data === 'string' || typeof data === 'number') {
         data = { [messageKey]: data }
       }
 
