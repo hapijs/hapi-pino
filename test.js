@@ -49,7 +49,7 @@ function getServer () {
 }
 
 function sink (func) {
-  var result = split(JSON.parse)
+  const result = split(JSON.parse)
   result.pipe(writeStream.obj(func))
   return result
 }
