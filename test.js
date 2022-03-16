@@ -165,6 +165,36 @@ experiment('logs each request', () => {
     await finish
   })
 
+  test('without duplicate req data', async () => {
+    const server = getServer()
+    let done
+
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    // We do a manual setup here compared to other tests
+    // as the `JSON.parse` in the `sink` function hides the double key from us.
+    const stream = split()
+    stream.pipe(writeStream.obj((data) => {
+      expect(data.match(/"req":/g).length).to.equal(1)
+
+      done()
+    }))
+
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info'
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject('/something')
+    await finish
+  })
+
   test('track responseTime', async () => {
     const server = getServer()
 
@@ -584,6 +614,7 @@ experiment('logs through request.log', () => {
       (data, enc, cb) => {
         if (data.tags) {
           expect(data.data).to.equal('hello logger')
+          expect(data.req).to.not.be.undefined()
           resolver()
         }
         cb()
@@ -907,7 +938,7 @@ experiment('request.logger.child() bindings', () => {
       done = resolve
     })
     const stream = sink(data => {
-      expect(data.req).to.not.be.undefined()
+      expect(data.req).to.be.undefined()
       expect(data.custom).to.not.be.undefined()
       done()
     })
@@ -1134,6 +1165,42 @@ experiment('options.logRequestStart', () => {
         stream: stream,
         level: 'info',
         getChildBindings: (req) => ({ requestId: 'request1234' }),
+        logRequestStart: true
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject('/something')
+    await finish
+  })
+
+  test('when options.logRequestStart is true, don\'t log req twice ', async () => {
+    const server = getServer()
+    let done
+
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    // We do a manual setup here compared to other tests
+    // as the `JSON.parse` in the `sink` function hides the double key from us.
+    const stream = split()
+    stream.pipe(writeStream.obj((data, enc, cb) => {
+      expect(data.match(/"req":/g).length).to.equal(1)
+
+      // If we get to the response log we're done
+      if (data.includes('"responseTime":')) {
+        done()
+      }
+
+      cb()
+    }))
+
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info',
         logRequestStart: true
       }
     }
