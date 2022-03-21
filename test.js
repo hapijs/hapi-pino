@@ -303,7 +303,39 @@ experiment('logs each request', () => {
       if (count === 0) {
         expect(data.err.message).to.equal('boom')
         expect(data.level).to.equal(50)
-        expect(data.msg).to.equal('request error')
+        expect(data.msg).to.equal('boom')
+      } else {
+        expect(data.res.statusCode).to.equal(500)
+        expect(data.level).to.equal(30)
+        expect(data.msg).to.match(/get \/ 500 \(\d*ms\)/)
+        done()
+      }
+      count++
+      cb()
+    })
+    await server.inject('/')
+    await finish
+  })
+
+  test('handles 500s with no message', async () => {
+    const server = getServer()
+    let count = 0
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    server.route({
+      path: '/',
+      method: 'GET',
+      handler: (req, reply) => {
+        throw new Error()
+      }
+    })
+    await registerWithSink(server, 'info', (data, enc, cb) => {
+      if (count === 0) {
+        expect(data.err.message).to.equal('Internal Server Error')
+        expect(data.level).to.equal(50)
+        expect(data.msg).to.equal('Internal Server Error')
       } else {
         expect(data.res.statusCode).to.equal(500)
         expect(data.level).to.equal(30)
