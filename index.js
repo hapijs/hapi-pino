@@ -147,7 +147,7 @@ async function register (server, options) {
           tags: event.tags,
           err: event.error
         },
-        'request error'
+        event.error.message // Will default to `Internal Server Error` by hapi
       )
     } else if (event.channel === 'app' && !isCustomTagsLoggingIgnored(event, ignoredEventTags.request)) {
       logEvent(request.logger, event)
