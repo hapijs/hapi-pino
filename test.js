@@ -37,6 +37,11 @@ function getServer () {
       handler: async (request, h) => 'ok'
     },
     {
+      method: 'POST',
+      path: '/{foo}-{bar}',
+      handler: async (request, h) => 'ok'
+    },
+    {
       method: 'GET',
       path: '/error',
       handler: async (request, h) => {
@@ -2400,6 +2405,37 @@ experiment('logging with request queryParams', () => {
     await server.inject({
       method: 'POST',
       url: '/?foo=42&bar=43'
+    })
+
+    await done
+  })
+})
+
+experiment('logginw with request pathParams', () => {
+  test('with pre-defined req serializer', async () => {
+    const server = getServer()
+    let resolver
+    const done = new Promise((resolve, reject) => {
+      resolver = resolve
+    })
+    const stream = sink(data => {
+      expect(data.pathParams).to.equal({ foo: '42', bar: '43' })
+      resolver()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        logPathParams: true
+      }
+    }
+
+    await server.register(plugin)
+
+    await server.inject({
+      method: 'POST',
+      url: '/42-43'
     })
 
     await done

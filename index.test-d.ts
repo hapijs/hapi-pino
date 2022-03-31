@@ -10,6 +10,7 @@ const server = new Server();
 const options: HapiPino.Options = {
   timestamp: () => `,"time":"${new Date(Date.now()).toISOString()}"`,
   logQueryParams: false,
+  logPathParams: false,
   logPayload: false,
   logRouteTags: false,
   logRequestStart: false,
