@@ -2411,7 +2411,7 @@ experiment('logging with request queryParams', () => {
   })
 })
 
-experiment('logginw with request pathParams', () => {
+experiment('logging with request pathParams', () => {
   test('with pre-defined req serializer', async () => {
     const server = getServer()
     let resolver
