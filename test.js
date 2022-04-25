@@ -1051,7 +1051,7 @@ experiment('options.logRequestStart', () => {
       done = resolve
     })
     const stream = sink(data => {
-      expect(data.msg).to.equal('request start')
+      expect(data.msg).to.equal('[request] get /something')
       expect(data.req).to.be.an.object()
       expect(data.req.id).to.be.a.string()
       done()
@@ -1099,7 +1099,7 @@ experiment('options.logRequestStart', () => {
         expect(data.msg).to.match(/\[response\] get \/ignored 200 \(\d*ms\)/)
       } else if (count === 1) {
         expect(data.req.url).to.endWith('/foo')
-        expect(data.msg).to.equal('request start')
+        expect(data.msg).to.equal('[request] get /foo')
       } else {
         expect(data.req.url).to.endWith('/foo')
         expect(data.msg).to.match(/\[response\] get \/foo 200 \(\d*ms\)/)
@@ -1142,7 +1142,7 @@ experiment('options.logRequestStart', () => {
     let count = 0
     const stream = sink((data, enc, cb) => {
       if (count === 0) {
-        expect(data.msg).to.equal('request start')
+        expect(data.msg).to.equal('[request] get /something')
         expect(data.req).to.be.an.object()
         expect(data.res).to.be.undefined()
       } else {
@@ -1177,7 +1177,7 @@ experiment('options.logRequestStart', () => {
     let count = 0
     const stream = sink((data, enc, cb) => {
       if (count === 0) {
-        expect(data.msg).to.equal('request start')
+        expect(data.msg).to.equal('[request] get /something')
         expect(data.req).to.be.an.object()
         expect(data.res).to.be.undefined()
         expect(data.requestId).to.equal('request1234')
@@ -1309,9 +1309,9 @@ experiment('options.logRequestComplete', () => {
     let count = 0
     const stream = sink((data, enc, cb) => {
       if (count === 0) {
-        expect(data.msg).to.equal('request start')
+        expect(data.msg).to.equal('[request] get /something')
       } else {
-        expect(data.msg).to.equal('request start')
+        expect(data.msg).to.equal('[request] get /something')
         done()
       }
       count++

@@ -110,7 +110,7 @@ async function register (server, options) {
     if (shouldLogRequestStart(request)) {
       request.logger.info({
         req: childBindings.req ? undefined : request
-      }, 'request start')
+      }, `[request] ${request.method} ${request.path}`)
     }
 
     return h.continue
