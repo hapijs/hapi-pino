@@ -1,5 +1,7 @@
 'use strict'
 
+const net = require('net')
+const stream = require('stream')
 const Code = require('@hapi/code')
 const Lab = require('@hapi/lab')
 const Hoek = require('@hapi/hoek')
@@ -282,6 +284,56 @@ experiment('logs each request', () => {
       done()
     })
     await server.inject('/')
+    await finish
+  })
+
+  test('correctly set the status code on requests aborted during response payload processing', async (flags) => {
+    const opts = { host: '127.0.0.1', port: 3000 }
+    const server = Hapi.server(opts)
+
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    server.route({
+      path: '/',
+      method: 'GET',
+      handler: (req, h) => {
+        const source = new stream.Readable({
+          read () {
+            if (this.called) {
+              return
+            }
+
+            this.called = true
+            this.push('delayed')
+          }
+        })
+
+        source.pipe(req.raw.res)
+        return h.abandon
+      }
+    })
+    await registerWithSink(server, 'info', (data, enc, cb) => {
+      if (data.res) {
+        expect(data.res.statusCode).to.equal(200)
+        expect(data.msg).to.match(/\[response\] get \/ - \(\d*ms\)/)
+        done()
+      }
+      cb()
+    })
+
+    await server.start()
+    flags.onCleanup = () => server.stop()
+
+    const client = net.connect(server.info.port, server.info.address, () => {
+      client.write('GET / HTTP/1.1\r\n\r\n')
+    })
+
+    client.on('data', () => {
+      client.destroy()
+    })
     await finish
   })
 
