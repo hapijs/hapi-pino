@@ -349,6 +349,43 @@ experiment('logs each request', () => {
     await finish
   })
 
+  test('handles 500s with options.customRequestErrorMessage', async () => {
+    const server = getServer()
+    let count = 0
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    const stream = sink((data, enc, cb) => {
+      if (count === 0) {
+        expect(data.err.message).to.equal('foobar')
+        expect(data.level).to.equal(50)
+        expect(data.msg).to.match(/request failed for get \/error with error: foobar/)
+      } else {
+        expect(data.res.statusCode).to.equal(500)
+        expect(data.level).to.equal(30)
+        expect(data.msg).to.match(/get \/error 500 \(\d*ms\)/)
+        done()
+      }
+      count++
+      cb()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info',
+        logRequestComplete: true,
+        customRequestErrorMessage: (request, error) => `request failed for ${request.method} ${request.path} with error: ${error.message}`
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject('/error')
+    await finish
+  })
+
   test('handles bad encoding', async () => {
     const server = getServer()
     let done
@@ -1241,6 +1278,33 @@ experiment('options.logRequestStart', () => {
     await server.inject('/something')
     await finish
   })
+
+  test('when options.logRequestStart is true and options.customRequestStartMessage is set', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    const stream = sink(data => {
+      expect(data.msg).to.equal('request for /something')
+      expect(data.req).to.be.an.object()
+      expect(data.req.id).to.be.a.string()
+      done()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info',
+        logRequestStart: true,
+        customRequestStartMessage: (request) => `request for ${request.path}`
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject('/something')
+    await finish
+  })
 })
 
 experiment('options.logRequestComplete', () => {
@@ -1382,6 +1446,35 @@ experiment('options.logRequestComplete', () => {
       method: 'GET',
       url: '/foo'
     })
+    await finish
+  })
+
+  test('when options.logRequestComplete is true and options.customRequestCompleteMessage is set', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    const stream = sink(data => {
+      expect(data.msg).to.match(/request completed for get \/something with 200 after \d*ms/)
+      expect(data.req).to.be.an.object()
+      expect(data.req.id).to.exists()
+      expect(data.res).to.be.an.object()
+      done()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream: stream,
+        level: 'info',
+        logRequestComplete: true,
+        customRequestCompleteMessage: (request, responseTime) => `request completed for ${request.method} ${request.path} with ${request.response.statusCode} after ${responseTime}ms`
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject('/something')
     await finish
   })
 })

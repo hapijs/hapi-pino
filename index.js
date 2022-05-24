@@ -94,6 +94,10 @@ async function register (server, options) {
       ? () => !!options.logRequestComplete
       : () => true
 
+  const requestStartMessage = options.customRequestStartMessage || function () { return 'request start' }
+  const requestCompleteMessage = options.customRequestCompleteMessage || function (request, responseTime) { return `[response] ${request.method} ${request.path} ${request.raw.res.statusCode} (${responseTime}ms)` }
+  const requestErrorMessage = options.customRequestErrorMessage || function (request, error) { return error.message } // Will default to `Internal Server Error` by hapi
+
   // expose logger as 'server.logger'
   server.decorate('server', 'logger', logger)
 
@@ -110,7 +114,7 @@ async function register (server, options) {
     if (shouldLogRequestStart(request)) {
       request.logger.info({
         req: childBindings.req ? undefined : request
-      }, 'request start')
+      }, requestStartMessage(request))
     }
 
     return h.continue
@@ -147,7 +151,7 @@ async function register (server, options) {
           tags: event.tags,
           err: event.error
         },
-        event.error.message // Will default to `Internal Server Error` by hapi
+        requestErrorMessage(request, event.error)
       )
     } else if (event.channel === 'app' && !isCustomTagsLoggingIgnored(event, ignoredEventTags.request)) {
       logEvent(request.logger, event)
@@ -177,7 +181,7 @@ async function register (server, options) {
           res: request.raw.res,
           responseTime
         },
-        `[response] ${request.method} ${request.path} ${request.raw.res.statusCode} (${responseTime}ms)`
+        requestCompleteMessage(request, responseTime)
       )
     }
   })
