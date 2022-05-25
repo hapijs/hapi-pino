@@ -120,6 +120,12 @@ events"](#hapievents) section.
   two via requestId (frequently done via `headers['x-request-id']`) , where "request start" only logs the request and a requestId,
   and `request completed` only logs the response and the requestId.
 
+### `options.customRequestStartMessage`
+
+  **Default**: 'request start'
+
+  Set to a `function (request) => { /* returns message string */ }`. This function will be invoked at each request received, setting "msg" property to returned string. If not set, default value will be used.
+
 ### `options.logRequestComplete: boolean | (Request) => Boolean`
 
   **Default**: true
@@ -127,6 +133,18 @@ events"](#hapievents) section.
   Whether hapi-pino should add a `log.info()` at the completion of Hapi requests for the given Request.
 
   For convenience, you can pass in `true` to always log `request complete` events, or `false` to disable logging `request complete` events
+
+### `options.customRequestCompleteMessage`
+
+  **Default**: '[response] ${request.method} ${request.path} ${request.raw.res.statusCode} (${responseTime}ms)'
+
+  Set to a `function (request, responseTime) => { /* returns message string */ }`. This function will be invoked at each completed request, setting "msg" property to returned string. If not set, default value will be used.
+
+### `options.customRequestErrorMessage`
+
+  **Default**: `error.message`
+
+  Set to a `function (request, err) => { /* returns message string */ }`. This function will be invoked at each failed request, setting "msg" property to returned string. If not set, default value will be used.
 
 ### `options.stream` Pino.DestinationStream
 
