@@ -95,7 +95,7 @@ async function register (server, options) {
       : () => true
 
   const requestStartMessage = options.customRequestStartMessage || function () { return 'request start' }
-  const requestCompleteMessage = options.customRequestCompleteMessage || function (request, responseTime) { return `[response] ${request.method} ${request.path} ${request.raw.res.statusCode} (${responseTime}ms)` }
+  const requestCompleteMessage = options.customRequestCompleteMessage || function (request, responseTime) { return `[response] ${request.method} ${request.path} ${request.raw.res.headersSent ? request.raw.res.statusCode : '-'} (${responseTime}ms)` }
   const requestErrorMessage = options.customRequestErrorMessage || function (request, error) { return error.message } // Will default to `Internal Server Error` by hapi
 
   // expose logger as 'server.logger'
