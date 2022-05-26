@@ -1,4 +1,4 @@
-# hapi-pino&nbsp;&nbsp;![Tests Status](https://github.com/pinojs/hapi-pino/actions/workflows/test.yml/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/pinojs/hapi-pino/badge.svg?branch=master)](https://coveralls.io/github/pinojs/hapi-pino?branch=master)
+# hapi-pino&nbsp;&nbsp;![Tests Status](https://github.com/pinojs/hapi-pino/actions/workflows/test.yml/badge.svg)
 
 
 [Hapi](http://hapijs.com) plugin for the [Pino](https://github.com/pinojs/pino) logger. It logs in JSON for easy
