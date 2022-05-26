@@ -177,6 +177,7 @@ async function register (server, options) {
         {
           payload: options.logPayload ? request.payload : undefined,
           queryParams: options.logQueryParams ? request.query : undefined,
+          pathParams: options.logPathParams ? request.params : undefined,
           tags: options.logRouteTags ? request.route.settings.tags : undefined,
           res: request.raw.res,
           responseTime

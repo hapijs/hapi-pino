@@ -18,6 +18,7 @@ declare namespace HapiPino {
   interface Options extends pino.LoggerOptions {
     timestamp?: boolean | (() => string) | undefined;
     logQueryParams?: boolean | undefined;
+    logPathParams?: boolean | undefined;
     logPayload?: boolean | undefined;
     logRouteTags?: boolean | undefined;
     logRequestStart?: boolean | ((req: Request) => boolean) | undefined;

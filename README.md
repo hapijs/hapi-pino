@@ -101,6 +101,12 @@ events"](#hapievents) section.
 
   When enabled, add the request query as `queryParams` to the `response` event log.
 
+### `options.logPathParams: boolean`
+
+  **Default**: `false`
+
+  When enabled, add the request params as `pathParams` to the `response` event log.
+
 ### `options.logRouteTags: boolean`
 
   **Default**: `false`
