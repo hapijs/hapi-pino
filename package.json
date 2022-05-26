@@ -20,20 +20,20 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "@hapi/code": "^8.0.7",
+    "@hapi/code": "^9.0.0",
     "@hapi/hapi": "^20.2.1",
-    "@hapi/lab": "^24.5.1",
+    "@hapi/lab": "^25.0.0",
     "coveralls": "^3.1.1",
     "flush-write-stream": "^2.0.0",
     "make-promises-safe": "^5.1.0",
     "pino-pretty": "^7.5.3",
     "pre-commit": "^1.2.2",
     "split2": "^4.1.0",
-    "standard": "^16.0.4",
-    "tsd": "^0.19.1"
+    "standard": "^17.0.0",
+    "tsd": "^0.20.0"
   },
   "dependencies": {
-    "@hapi/hoek": "^9.2.1",
+    "@hapi/hoek": "^10.0.0",
     "@types/hapi__hapi": "^20.0.10",
     "abstract-logging": "^2.0.1",
     "get-caller-file": "^2.0.5",

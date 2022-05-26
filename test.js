@@ -66,8 +66,8 @@ async function registerWithSink (server, level, func) {
   const plugin = {
     plugin: Pino,
     options: {
-      stream: stream,
-      level: level
+      stream,
+      level
     }
   }
 
@@ -79,9 +79,9 @@ async function tagsWithSink (server, tags, func) {
   const plugin = {
     plugin: Pino,
     options: {
-      stream: stream,
+      stream,
       level: 'trace',
-      tags: tags
+      tags
     }
   }
 
@@ -192,7 +192,7 @@ experiment('logs each request', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info'
       }
     }
@@ -431,7 +431,7 @@ experiment('logs each request', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         logRequestComplete: true,
         customRequestErrorMessage: (request, error) => `request failed for ${request.method} ${request.path} with error: ${error.message}`
@@ -652,7 +652,7 @@ experiment('logs through server.log', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'debug',
         allTags: 'debug'
       }
@@ -677,7 +677,7 @@ experiment('logs through server.log', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream
+        stream
       }
     }
 
@@ -699,7 +699,7 @@ experiment('logs through server.log', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         customLevels: {
           bar: 123
         },
@@ -796,7 +796,7 @@ experiment('logs through request.log', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'debug'
       }
     }
@@ -829,7 +829,7 @@ experiment('disables log events', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         logEvents: false
       }
@@ -849,7 +849,7 @@ experiment('disables log events', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         logEvents: false
       }
@@ -870,7 +870,7 @@ experiment('disables log events', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         logEvents: false
       }
@@ -890,7 +890,7 @@ experiment('disables log events', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         logEvents: false
       }
@@ -952,7 +952,7 @@ experiment('logging with `request` event listener', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         logEvents: false
       }
     }
@@ -1047,7 +1047,7 @@ experiment('request.logger.child() bindings', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info'
       }
     }
@@ -1071,7 +1071,7 @@ experiment('request.logger.child() bindings', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         getChildBindings: (req) => ({ custom: true })
       }
@@ -1101,7 +1101,7 @@ experiment('options.logRequestStart', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info'
       }
     }
@@ -1128,7 +1128,7 @@ experiment('options.logRequestStart', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info'
       }
     }
@@ -1153,7 +1153,7 @@ experiment('options.logRequestStart', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         logRequestStart: true
       }
@@ -1251,7 +1251,7 @@ experiment('options.logRequestStart', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         logRequestStart: true
       }
@@ -1288,7 +1288,7 @@ experiment('options.logRequestStart', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         getChildBindings: (req) => ({ requestId: 'request1234' }),
         logRequestStart: true
@@ -1325,7 +1325,7 @@ experiment('options.logRequestStart', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         logRequestStart: true
       }
@@ -1351,7 +1351,7 @@ experiment('options.logRequestStart', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         logRequestStart: true,
         customRequestStartMessage: (request) => `request for ${request.path}`
@@ -1382,7 +1382,7 @@ experiment('options.logRequestComplete', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info'
       }
     }
@@ -1409,7 +1409,7 @@ experiment('options.logRequestComplete', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         logRequestComplete: true
       }
@@ -1441,7 +1441,7 @@ experiment('options.logRequestComplete', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         logRequestStart: true,
         logRequestComplete: false
@@ -1523,7 +1523,7 @@ experiment('options.logRequestComplete', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         logRequestComplete: true,
         customRequestCompleteMessage: (request, responseTime) => `request completed for ${request.method} ${request.path} with ${request.response.statusCode} after ${responseTime}ms`
@@ -1550,7 +1550,7 @@ experiment('logging with mergeHapiLogData option enabled', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         mergeHapiLogData: true
       }
@@ -1574,7 +1574,7 @@ experiment('logging with mergeHapiLogData option enabled', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         mergeHapiLogData: true
       }
@@ -1598,7 +1598,7 @@ experiment('logging with mergeHapiLogData option enabled', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         mergeHapiLogData: true
       }
@@ -1622,7 +1622,7 @@ experiment('logging with mergeHapiLogData option enabled', () => {
     const plugin = {
       plugin: Pino,
       options: {
-        stream: stream,
+        stream,
         level: 'info',
         mergeHapiLogData: true,
         messageKey: 'message'
