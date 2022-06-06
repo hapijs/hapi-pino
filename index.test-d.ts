@@ -32,6 +32,9 @@ const options: HapiPino.Options = {
   getChildBindings: (req: Request) => ({
     'x-request-id': req.headers['x-request-id'],
   }),
+  customRequestStartMessage: (req: Request) => `request start ${req.path}`,
+  customRequestCompleteMessage: (req: Request, responseTime: number) => `request complete ${req.path} in ${responseTime}ms`,
+  customRequestErrorMessage: (req: Request, error: Error) => `request failed ${req.path} with error ${error.message}`,
   instance: pinoLogger,
   logEvents: false,
   mergeHapiLogData: false,

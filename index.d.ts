@@ -23,6 +23,9 @@ declare namespace HapiPino {
     logRouteTags?: boolean | undefined;
     logRequestStart?: boolean | ((req: Request) => boolean) | undefined;
     logRequestComplete?: boolean | ((req: Request) => boolean) | undefined;
+    customRequestStartMessage?: ((req: Request) => string) | undefined;
+    customRequestCompleteMessage?: ((req: Request, responseTime: number) => string) | undefined;
+    customRequestErrorMessage?: ((req: Request, error: Error) => string) | undefined;
     tags?: { [key in pino.Level]?: string } | undefined;
     stream?: NodeJS.WriteStream | undefined;
     allTags?: pino.Level | undefined;
