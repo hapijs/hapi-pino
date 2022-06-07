@@ -1665,6 +1665,40 @@ experiment('custom serializers', () => {
     await finish
   })
 
+  test('logging with configured req serializer (unwrapped)', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    const stream = sink(data => {
+      expect(data.req.path).to.equal('/')
+      expect(data.req.raw).to.be.an.object()
+
+      expect(data.res).to.be.an.object()
+      expect(data.res.statusCode).to.be.equal(404)
+      done()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        wrapSerializers: false,
+        serializers: {
+          req: req => ({ path: req.path, raw: req })
+        }
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject({
+      method: 'GET',
+      url: '/'
+    })
+    await finish
+  })
+
   test('logging with configured res serializer', async () => {
     const server = getServer()
     let done
@@ -1683,6 +1717,41 @@ experiment('custom serializers', () => {
         instance: logger,
         serializers: {
           res: res => ({ code: res.statusCode, raw: res.raw })
+        }
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject({
+      method: 'GET',
+      url: '/'
+    })
+    await finish
+  })
+
+  test('logging with configured res serializer (unwrapped)', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    const stream = sink(data => {
+      expect(data.req).to.be.an.object()
+      expect(data.req.url).to.be.equal('/')
+
+      expect(data.res.code).to.equal(404)
+      expect(data.res.headersFlushed).to.equal(true)
+      expect(data.res.raw).to.be.an.object()
+      done()
+    })
+    const logger = require('pino')(stream)
+    const plugin = {
+      plugin: Pino,
+      options: {
+        instance: logger,
+        wrapSerializers: false,
+        serializers: {
+          res: res => ({ code: res.statusCode, headersFlushed: res.headersSent, raw: res })
         }
       }
     }

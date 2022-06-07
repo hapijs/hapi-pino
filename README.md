@@ -192,6 +192,29 @@ events"](#hapievents) section.
   }
   ```
 
+### `options.wrapSerializers: boolean`
+
+  **Default**: `true`
+
+  When `false`, custom serializers will be passed the raw value directly.
+
+  **Example**:
+  If you prefer to work with the raw value directly, or you want to honor the custom serializers already defined by `options.instance`, you can pass in `options.wrapSerializers` as `false`:
+
+  ```js
+  {
+    wrapSerializers: false,
+    serializers: {
+      req (req) {
+        // `req` is the raw hapi's `Request` object, not the already serialized request from `pino.stdSerializers.req`.
+        return {
+          message: req.foo
+        };
+      }
+    }
+  }
+  ```
+
 ### `options.instance: Pino`
 
   Uses a previously created Pino instance as the logger.

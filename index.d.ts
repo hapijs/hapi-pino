@@ -28,6 +28,7 @@ declare namespace HapiPino {
     allTags?: pino.Level | undefined;
     instance?: pino.Logger | undefined;
     logEvents?: string[] | false | null | undefined;
+    wrapSerializers: boolean | undefined;
     mergeHapiLogData?: boolean | undefined;
     ignorePaths?: string[] | undefined;
     ignoreTags?: string[] | undefined;
