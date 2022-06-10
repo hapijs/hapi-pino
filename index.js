@@ -29,9 +29,14 @@ async function register (server, options) {
   })
 
   options.serializers = options.serializers || {}
-  options.serializers.req = stdSerializers.wrapRequestSerializer(options.serializers.req || stdSerializers.req)
-  options.serializers.res = stdSerializers.wrapResponseSerializer(options.serializers.res || stdSerializers.res)
+
+  const wrapSerializers = 'wrapSerializers' in options ? options.wrapSerializers : true
+  const reqSerializer = options.serializers.req || stdSerializers.req
+  const resSerializer = options.serializers.res || stdSerializers.res
+
   options.serializers.err = options.serializers.err || pino.stdSerializers.err
+  options.serializers.req = wrapSerializers ? stdSerializers.wrapRequestSerializer(reqSerializer) : reqSerializer
+  options.serializers.res = wrapSerializers ? stdSerializers.wrapResponseSerializer(resSerializer) : resSerializer
 
   if (options.logEvents === undefined) {
     options.logEvents = ['onPostStart', 'onPostStop', 'response', 'request-error']

@@ -26,6 +26,7 @@ const options: HapiPino.Options = {
     fatal: 'fatal',
   },
   allTags: 'info',
+  wrapSerializers: false,
   serializers: {
     req: (req: any) => console.log(req),
   },
