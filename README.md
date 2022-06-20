@@ -162,6 +162,8 @@ events"](#hapievents) section.
 
   **Default**: `false`
 
+  > This option is now deprecated, you should use the `transport` option. You can [view how to use it here](https://github.com/pinojs/pino-pretty#programmatic-integration). This will also allow you full customisation over `pino-pretty`
+
   Pretty print the logs (same as `node server | pino`), disabled in production.  Enable in development by passing `true`
 
 ### `options.tags: ({ [key in pino.Level]?: string })`
