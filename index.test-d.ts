@@ -48,3 +48,6 @@ const options: HapiPino.Options = {
 };
 
 expectType<Promise<void>>(server.register({ plugin: HapiPino, options }));
+
+const emptyOptions: HapiPino.Options = {};
+expectType<Promise<void>>(server.register({ plugin: HapiPino, options: emptyOptions }));
