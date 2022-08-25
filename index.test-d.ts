@@ -48,3 +48,15 @@ const options: HapiPino.Options = {
 };
 
 expectType<Promise<void>>(server.register({ plugin: HapiPino, options }));
+
+server.logger.info('some message');
+server.logger.error(new Error('some error'));
+
+server.route({
+  method: 'GET',
+  path: '/path',
+  handler(request) {
+    request.logger.info('some message');
+    request.logger.error(new Error('some error'));
+  }
+});
