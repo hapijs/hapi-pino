@@ -49,6 +49,9 @@ const options: HapiPino.Options = {
 
 expectType<Promise<void>>(server.register({ plugin: HapiPino, options }));
 
+const emptyOptions: HapiPino.Options = {};
+expectType<Promise<void>>(server.register({ plugin: HapiPino, options: emptyOptions }));
+
 server.logger.info('some message');
 server.logger.error(new Error('some error'));
 
