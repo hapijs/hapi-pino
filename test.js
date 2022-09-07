@@ -322,7 +322,7 @@ experiment('logs each request', () => {
     })
     await registerWithSink(server, 'info', (data, enc, cb) => {
       if (data.res) {
-        expect(data.res.statusCode).to.equal(200)
+        expect(data.res.statusCode).to.equal(null)
         expect(data.msg).to.match(/\[response\] get \/ - \(\d*ms\)/)
         done()
       }
