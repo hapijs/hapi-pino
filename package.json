@@ -26,7 +26,7 @@
     "coveralls": "^3.1.1",
     "flush-write-stream": "^2.0.0",
     "make-promises-safe": "^5.1.0",
-    "pino-pretty": "^7.5.3",
+    "pino-pretty": "^7.6.1",
     "pre-commit": "^1.2.2",
     "split2": "^4.1.0",
     "standard": "^17.0.0",
@@ -37,7 +37,7 @@
     "@types/hapi__hapi": "^20.0.10",
     "abstract-logging": "^2.0.1",
     "get-caller-file": "^2.0.5",
-    "pino": "^7.8.1"
+    "pino": "^8.5.0"
   },
   "repository": {
     "type": "git",
