@@ -16,7 +16,6 @@ const options: HapiPino.Options = {
   logRequestStart: false,
   logRequestComplete: true,
   stream: process.stdout,
-  prettyPrint: process.env.NODE_ENV !== 'PRODUCTION',
   tags: {
     trace: 'trace',
     debug: 'debug',
