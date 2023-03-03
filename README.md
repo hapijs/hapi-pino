@@ -4,16 +4,18 @@
 [Hapi](http://hapijs.com) plugin for the [Pino](https://github.com/pinojs/pino) logger. It logs in JSON for easy
 post-processing.
 
-## Supported Hapi versions
+## Hapi and Pino versions supported by hapi-pino
 
-- hapi-pino v9.x supports Hapi v20.
-- hapi-pino v8.x supports Hapi v18, v19 and v20.
-- hapi-pino v7.x supports Hapi v18 and v19.
-- hapi-pino v6.x supports Hapi v17, v18 and v19
-- hapi-pino v5.x supports Hapi v17 and v18
-- hapi-pino v3.x
-supports Hapi v17 only. The maximum version that can be used with Hapi v16 is Pino v4.
-- [hapi-pino v2.x](https://github.com/pinojs/hapi-pino/tree/v2.x.x) is the LTS line for Hapi v16.
+| hapi-pino     | hapi          | pino          |
+| ------------- |:--------------|:--------------|
+| v12.x         | v21           | v8            |
+| v11.x         | v20           | v8            |
+| v9.x - v10.x  | v20           | v7            |
+| v8.x          | v18, v19, v20 | v6            |
+| v6.x          | v17, v18, v19 | v5            |
+| v5.x          | v17, v18      | v5            |
+| v3.x - v4.x   | v17           | v4            |
+| v2.x          | v16           | v4            |
 
 ## Install
 
@@ -54,7 +56,6 @@ async function start () {
   await server.register({
     plugin: require('hapi-pino'),
     options: {
-      prettyPrint: process.env.NODE_ENV !== 'production',
       // Redact Authorization headers, see https://getpino.io/#/docs/redaction
       redact: ['req.headers.authorization']
     }

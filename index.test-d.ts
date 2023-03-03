@@ -1,11 +1,11 @@
-import { Request, Server } from '@hapi/hapi';
+import { Request, Server, server, ServerApplicationState } from '@hapi/hapi';
 import pino from 'pino';
 import * as HapiPino from '.';
 import { expectType } from 'tsd';
 
 const pinoLogger = pino();
 
-const server = new Server();
+const hapiServer = server();
 
 const options: HapiPino.Options = {
   timestamp: () => `,"time":"${new Date(Date.now()).toISOString()}"`,
@@ -46,15 +46,15 @@ const options: HapiPino.Options = {
   ignoredEventTags: [{ log: ['DEBUG', 'TEST'], request: ['DEBUG', 'TEST'] }],
 };
 
-expectType<Promise<void>>(server.register({ plugin: HapiPino, options }));
+expectType<Promise<Server<ServerApplicationState> & void>>(hapiServer.register({ plugin: HapiPino, options }));
 
 const emptyOptions: HapiPino.Options = {};
-expectType<Promise<void>>(server.register({ plugin: HapiPino, options: emptyOptions }));
+expectType<Promise<Server<ServerApplicationState> & void>>(hapiServer.register({ plugin: HapiPino, options: emptyOptions }));
 
-server.logger.info('some message');
-server.logger.error(new Error('some error'));
+hapiServer.logger.info('some message');
+hapiServer.logger.error(new Error('some error'));
 
-server.route({
+hapiServer.route({
   method: 'GET',
   path: '/path',
   handler(request) {
