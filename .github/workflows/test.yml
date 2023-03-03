@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         node: [14, 16, 18]
-        hapi: ["@hapi/hapi@20"]
+        hapi: ["@hapi/hapi@21"]
 
     steps:
     - uses: actions/checkout@v2
