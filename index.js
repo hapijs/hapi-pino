@@ -171,6 +171,7 @@ async function register (server, options) {
 
     if (shouldLogRequestComplete(request)) {
       const info = request.info
+      const statusCode = request.response.statusCode
       if (!request.logger) {
         const childBindings = getChildBindings(request)
         request.logger = logger.child(childBindings)
@@ -184,6 +185,7 @@ async function register (server, options) {
           queryParams: options.logQueryParams ? request.query : undefined,
           pathParams: options.logPathParams ? request.params : undefined,
           tags: options.logRouteTags ? request.route.settings.tags : undefined,
+          err: options.log4xxResponseErrors && (statusCode >= 400 && statusCode < 500) ? request.response.source : undefined,
           res: request.raw.res,
           responseTime
         },
