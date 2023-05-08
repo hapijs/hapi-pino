@@ -20,6 +20,7 @@ const afterEach = lab.afterEach
 const expect = Code.expect
 
 const Hapi = require('@hapi/hapi')
+const Boom = require('@hapi/boom')
 const Pino = require('.')
 
 function getServer () {
@@ -61,31 +62,25 @@ function sink (func) {
   return result
 }
 
-async function registerWithSink (server, level, func) {
+async function registerWithOptionsSink (server, options, func) {
   const stream = sink(func)
   const plugin = {
     plugin: Pino,
     options: {
-      stream,
-      level
+      ...options,
+      stream
     }
   }
 
   await server.register(plugin)
 }
 
-async function tagsWithSink (server, tags, func) {
-  const stream = sink(func)
-  const plugin = {
-    plugin: Pino,
-    options: {
-      stream,
-      level: 'trace',
-      tags
-    }
-  }
+async function registerWithSink (server, level, func) {
+  await registerWithOptionsSink(server, { level }, func)
+}
 
-  await server.register(plugin)
+async function tagsWithSink (server, tags, func) {
+  await registerWithOptionsSink(server, { level: 'trace', tags }, func)
 }
 
 function onHelloWorld (data) {
@@ -543,6 +538,36 @@ experiment('logs each request', () => {
     await registerWithSink(server, 'info', data => {
       expect(data.res.statusCode).to.equal(200)
       expect(data.msg).to.match(/\[response\] get \/ 200 \(\d*ms\)/)
+      done()
+    })
+
+    await server.inject('/')
+    await finish
+  })
+
+  test('logs 4xx level error details', async () => {
+    const server = getServer()
+
+    let done
+
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    server.route({
+      path: '/',
+      method: 'GET',
+      handler: async (req, h) => {
+        return Boom.badRequest('invalid request')
+      }
+    })
+
+    await registerWithOptionsSink(server, { level: 'info', log4xxResponseErrors: true }, data => {
+      expect(data.res.statusCode).to.equal(400)
+      expect(data.err.stack).to.not.be.undefined()
+      expect(data.err.error).to.match(/Bad Request/)
+      expect(data.err.statusCode).to.equal(400)
+      expect(data.err.message).to.match(/invalid request/)
       done()
     })
 

@@ -20,6 +20,7 @@
   ],
   "license": "MIT",
   "devDependencies": {
+    "@hapi/boom": "^10.0.1",
     "@hapi/code": "^9.0.0",
     "@hapi/hapi": "^21.0.0",
     "@hapi/lab": "^25.0.0",

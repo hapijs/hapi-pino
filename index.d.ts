@@ -21,6 +21,7 @@ declare namespace HapiPino {
     logPathParams?: boolean | undefined;
     logPayload?: boolean | undefined;
     logRouteTags?: boolean | undefined;
+    log4xxResponseErrors?: boolean | undefined;
     logRequestStart?: boolean | ((req: Request) => boolean) | undefined;
     logRequestComplete?: boolean | ((req: Request) => boolean) | undefined;
     customRequestStartMessage?: ((req: Request) => string) | undefined;

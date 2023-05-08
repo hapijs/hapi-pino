@@ -114,6 +114,12 @@ events"](#hapievents) section.
 
   When enabled, add the request route tags (as configured in hapi `route.options.tags`) `tags` to the `response` event log.
 
+### `options.log4xxResponseErrors: boolean`
+
+  **Default**: `false`
+
+  When enabled, responses with status codes in the 400-500 range will have the value returned by the hapi lifecycle method added to the `response` event log as `err`.
+
 ### `options.logRequestStart: boolean | (Request) => boolean`
 
   **Default**: false
