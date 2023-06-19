@@ -103,6 +103,10 @@ async function register (server, options) {
   const requestCompleteMessage = options.customRequestCompleteMessage || function (request, responseTime) { return `[response] ${request.method} ${request.path} ${request.raw.res.headersSent ? request.raw.res.statusCode : '-'} (${responseTime}ms)` }
   const requestErrorMessage = options.customRequestErrorMessage || function (request, error) { return error.message } // Will default to `Internal Server Error` by hapi
 
+  const requestStartLevel = options.customRequestStartLevel || 'info'
+  const requestCompleteLevel = options.customRequestCompleteLevel || 'info'
+  const requestErrorLevel = options.customRequestErrorLevel || 'error'
+
   // expose logger as 'server.logger'
   server.decorate('server', 'logger', logger)
 
@@ -117,7 +121,7 @@ async function register (server, options) {
     request.logger = logger.child(childBindings)
 
     if (shouldLogRequestStart(request)) {
-      request.logger.info({
+      request.logger[requestStartLevel]({
         req: childBindings.req ? undefined : request
       }, requestStartMessage(request))
     }
@@ -151,7 +155,7 @@ async function register (server, options) {
     }
 
     if (event.error && isEnabledLogEvent(options, 'request-error')) {
-      request.logger.error(
+      request.logger[requestErrorLevel](
         {
           tags: event.tags,
           err: event.error
@@ -179,7 +183,7 @@ async function register (server, options) {
 
       // If you want `req` to be added either use the default `getChildBindings` or make sure `req` is passed in your custom bindings.
       const responseTime = (info.completed !== undefined ? info.completed : info.responded) - info.received
-      request.logger.info(
+      request.logger[requestCompleteLevel](
         {
           payload: options.logPayload ? request.payload : undefined,
           queryParams: options.logQueryParams ? request.query : undefined,

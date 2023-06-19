@@ -149,7 +149,7 @@ events"](#hapievents) section.
 
 ### `options.customRequestCompleteMessage`
 
-  **Default**: '[response] ${request.method} ${request.path} ${request.raw.res.statusCode} (${responseTime}ms)'
+  **Default**: `` `[response] ${request.method} ${request.path} ${request.raw.res.statusCode} (${responseTime}ms)` ``
 
   Set to a `function (request, responseTime) => { /* returns message string */ }`. This function will be invoked at each completed request, setting "msg" property to returned string. If not set, default value will be used.
 
@@ -158,6 +158,24 @@ events"](#hapievents) section.
   **Default**: `error.message`
 
   Set to a `function (request, err) => { /* returns message string */ }`. This function will be invoked at each failed request, setting "msg" property to returned string. If not set, default value will be used.
+
+### `options.customRequestStartLevel:  pino.Level`
+
+  **Default**: 'info'
+
+  The log level to use for `request start` events.
+
+### `options.customRequestCompleteLevel:  pino.Level`
+
+**Default**: 'info'
+
+  The log level to use for `request complete` events.
+
+### `options.customRequestErrorLevel:  pino.Level`
+
+**Default**: 'error'
+
+  The logging level to use for `request-error` events.
 
 ### `options.stream` Pino.DestinationStream
 

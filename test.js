@@ -1559,6 +1559,32 @@ experiment('options.logRequestComplete', () => {
     await server.inject('/something')
     await finish
   })
+
+  test('when options.logRequestComplete is true and options.customRequestCompleteLevel is set', async () => {
+    const server = getServer()
+    let done
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+    const stream = sink(data => {
+      expect(data.msg).to.startWith('[response]')
+      expect(data.level).to.equal(20)
+      done()
+    })
+    const plugin = {
+      plugin: Pino,
+      options: {
+        stream,
+        level: 'debug',
+        logRequestComplete: true,
+        customRequestCompleteLevel: 'debug'
+      }
+    }
+
+    await server.register(plugin)
+    await server.inject('/something')
+    await finish
+  })
 })
 
 experiment('logging with mergeHapiLogData option enabled', () => {
