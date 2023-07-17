@@ -27,6 +27,9 @@ declare namespace HapiPino {
     customRequestStartMessage?: ((req: Request) => string) | undefined;
     customRequestCompleteMessage?: ((req: Request, responseTime: number) => string) | undefined;
     customRequestErrorMessage?: ((req: Request, error: Error) => string) | undefined;
+    customRequestStartLevel?: pino.Level | undefined;
+    customRequestCompleteLevel?: pino.Level | undefined;
+    customRequestErrorLevel?: pino.Level | undefined;
     tags?: { [key in pino.Level]?: string } | undefined;
     stream?: NodeJS.WriteStream | undefined;
     allTags?: pino.Level | undefined;
