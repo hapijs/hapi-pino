@@ -135,9 +135,9 @@ events"](#hapievents) section.
 
 ### `options.customRequestStartMessage`
 
-  **Default**: 'request start'
+  **Default**: `(request) => { return 'request start' }`
 
-  Set to a `function (request) => { /* returns message string */ }`. This function will be invoked at each request received, setting "msg" property to returned string. If not set, default value will be used.
+  Set to a function `(request) => { /* returns message string */ }`. This function will be invoked at each request received, setting the "msg" property to the returned string. If not set, default value will be used.
 
 ### `options.logRequestComplete: boolean | (Request) => Boolean`
 
@@ -149,15 +149,15 @@ events"](#hapievents) section.
 
 ### `options.customRequestCompleteMessage`
 
-  **Default**: `` `[response] ${request.method} ${request.path} ${request.raw.res.statusCode} (${responseTime}ms)` ``
+  **Default**: `` (request, responseTime) => { return `[response] ${request.method} ${request.path} ${request.raw.res.statusCode} (${responseTime}ms)` } ``
 
-  Set to a `function (request, responseTime) => { /* returns message string */ }`. This function will be invoked at each completed request, setting "msg" property to returned string. If not set, default value will be used.
+  Set to a function `(request, responseTime) => { /* returns message string */ }`. This function will be invoked at each completed request, setting the "msg" property to the returned string. If not set, default value will be used.
 
 ### `options.customRequestErrorMessage`
 
-  **Default**: `error.message`
+  **Default**: `(request, err) => { return err.message }`
 
-  Set to a `function (request, err) => { /* returns message string */ }`. This function will be invoked at each failed request, setting "msg" property to returned string. If not set, default value will be used.
+  Set to a function `(request, err) => { /* returns message string */ }`. This function will be invoked at each failed request, setting the "msg" property to the returned string. If not set, default value will be used.
 
 ### `options.customRequestStartLevel:  pino.Level`
 
