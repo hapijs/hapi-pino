@@ -1587,6 +1587,60 @@ experiment('options.logRequestComplete', () => {
   })
 })
 
+experiment('options.logReturnedValue', () => {
+  test('when options.logReturnedValue is true, the response returned value should be added to the log as "returnedValue"', async () => {
+    const server = getServer()
+
+    let done
+
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    server.route({
+      path: '/',
+      method: 'GET',
+      handler: async (req, h) => {
+        return { foo: 100 }
+      }
+    })
+
+    await registerWithOptionsSink(server, { level: 'info', logReturnedValue: true }, data => {
+      expect(data.returnedValue).to.be.equals({ foo: 100 })
+      done()
+    })
+
+    await server.inject('/')
+    await finish
+  })
+
+  test('when options.logReturnedValue is omitted, "returnedValue" should not be added to the response event log', async () => {
+    const server = getServer()
+
+    let done
+
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    server.route({
+      path: '/',
+      method: 'GET',
+      handler: async (req, h) => {
+        return { foo: 101 }
+      }
+    })
+
+    await registerWithOptionsSink(server, { level: 'info' }, data => {
+      expect(data.returnedValue).to.be.undefined()
+      done()
+    })
+
+    await server.inject('/')
+    await finish
+  })
+})
+
 experiment('logging with mergeHapiLogData option enabled', () => {
   test("log event data is merged into pino's log object", async () => {
     const server = getServer()
