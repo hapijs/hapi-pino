@@ -120,11 +120,11 @@ events"](#hapievents) section.
 
   When enabled, responses with status codes in the 400-500 range will have the value returned by the hapi lifecycle method added to the `response` event log as `err`.
 
-### `options.logReturnedValue: boolean`
+### `options.logResponsePayload: boolean`
 
   **Default**: `false`
 
-  When enabled, add the response returned value (Hapi `request.response.source`) as `returnedValue` to the `response` event log.
+  When enabled, add the response returned value (Hapi `request.response.source`) as `responsePayload` to the `response` event log.
 
 ### `options.logRequestStart: boolean | (Request) => boolean`
 

@@ -1587,8 +1587,8 @@ experiment('options.logRequestComplete', () => {
   })
 })
 
-experiment('options.logReturnedValue', () => {
-  test('when options.logReturnedValue is true, the response returned value should be added to the log as "returnedValue"', async () => {
+experiment('options.logResponsePayload', () => {
+  test('when options.logResponsePayload is true, the response returned value should be added to the log as "responsePayload"', async () => {
     const server = getServer()
 
     let done
@@ -1605,8 +1605,8 @@ experiment('options.logReturnedValue', () => {
       }
     })
 
-    await registerWithOptionsSink(server, { level: 'info', logReturnedValue: true }, data => {
-      expect(data.returnedValue).to.be.equals({ foo: 100 })
+    await registerWithOptionsSink(server, { level: 'info', logResponsePayload: true }, data => {
+      expect(data.responsePayload).to.be.equals({ foo: 100 })
       done()
     })
 
@@ -1614,7 +1614,7 @@ experiment('options.logReturnedValue', () => {
     await finish
   })
 
-  test('when options.logReturnedValue is omitted, "returnedValue" should not be added to the response event log', async () => {
+  test('when options.logResponsePayload is omitted, "responsePayload" should not be added to the response event log', async () => {
     const server = getServer()
 
     let done
@@ -1632,7 +1632,7 @@ experiment('options.logReturnedValue', () => {
     })
 
     await registerWithOptionsSink(server, { level: 'info' }, data => {
-      expect(data.returnedValue).to.be.undefined()
+      expect(data.responsePayload).to.be.undefined()
       done()
     })
 
