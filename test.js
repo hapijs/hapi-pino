@@ -1587,6 +1587,60 @@ experiment('options.logRequestComplete', () => {
   })
 })
 
+experiment('options.logResponsePayload', () => {
+  test('when options.logResponsePayload is true, the response returned value should be added to the log as "responsePayload"', async () => {
+    const server = getServer()
+
+    let done
+
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    server.route({
+      path: '/',
+      method: 'GET',
+      handler: async (req, h) => {
+        return { foo: 100 }
+      }
+    })
+
+    await registerWithOptionsSink(server, { level: 'info', logResponsePayload: true }, data => {
+      expect(data.responsePayload).to.be.equals({ foo: 100 })
+      done()
+    })
+
+    await server.inject('/')
+    await finish
+  })
+
+  test('when options.logResponsePayload is omitted, "responsePayload" should not be added to the response event log', async () => {
+    const server = getServer()
+
+    let done
+
+    const finish = new Promise(function (resolve, reject) {
+      done = resolve
+    })
+
+    server.route({
+      path: '/',
+      method: 'GET',
+      handler: async (req, h) => {
+        return { foo: 101 }
+      }
+    })
+
+    await registerWithOptionsSink(server, { level: 'info' }, data => {
+      expect(data.responsePayload).to.be.undefined()
+      done()
+    })
+
+    await server.inject('/')
+    await finish
+  })
+})
+
 experiment('logging with mergeHapiLogData option enabled', () => {
   test("log event data is merged into pino's log object", async () => {
     const server = getServer()

@@ -191,6 +191,7 @@ async function register (server, options) {
           tags: options.logRouteTags ? request.route.settings.tags : undefined,
           err: options.log4xxResponseErrors && (statusCode >= 400 && statusCode < 500) ? request.response.source : undefined,
           res: request.raw.res,
+          responsePayload: options.logResponsePayload && request.response && request.response.source !== undefined ? request.response.source : undefined,
           responseTime
         },
         requestCompleteMessage(request, responseTime)
