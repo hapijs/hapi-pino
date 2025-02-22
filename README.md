@@ -122,7 +122,7 @@ events"](#hapievents) section.
 
 ### `options.logRequestStart: boolean | (Request) => boolean`
 
-  **Default**: false
+  **Default**: `false`
 
   Whether hapi-pino should add a `log.info()` at the beginning of Hapi requests for the given Request.
 
