@@ -1,0 +1,7 @@
+.github
+.idea
+.husky
+benchmarks
+test.js
+index.test-d.ts
+example.js
