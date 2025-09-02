@@ -1,5 +1,5 @@
 import { Request, Server, server, ServerApplicationState } from '@hapi/hapi';
-import pino from 'pino';
+import { pino } from 'pino';
 import * as HapiPino from '.';
 import { expectType } from 'tsd';
 
