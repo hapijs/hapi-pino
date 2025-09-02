@@ -1,6 +1,6 @@
 /// <reference types='node' />
 
-import type { pino } from 'pino';
+import type * as pino from 'pino';
 
 import { Plugin, Request } from '@hapi/hapi';
 

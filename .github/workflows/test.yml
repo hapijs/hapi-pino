@@ -15,13 +15,13 @@ jobs:
 
     strategy:
       matrix:
-        node: [14, 16, 18]
+        node: [20, 22, 24]
         hapi: ["@hapi/hapi@21"]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v5
     - name: Use Node.js ${{ matrix.node }}
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node }}
     - run: npm install

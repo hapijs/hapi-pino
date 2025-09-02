@@ -328,7 +328,7 @@ experiment('logs each request', () => {
     flags.onCleanup = () => server.stop()
 
     const client = net.connect(server.info.port, server.info.address, () => {
-      client.write('GET / HTTP/1.1\r\n\r\n')
+      client.write('GET / HTTP/1.1\r\nHost: example.com\r\n\r\n')
     })
 
     client.on('data', () => {

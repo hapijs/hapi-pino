@@ -4,11 +4,15 @@
   "description": "Hapi plugin for the Pino logger ",
   "main": "index.js",
   "types": "index.d.ts",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "coverage": "lab test.js -c",
     "coverage:lcov": "lab test.js -r lcov -o coverage/lcov.info",
     "coveralls": "lab test.js -r lcov | coveralls",
-    "test": "standard && lab --timeout 100000 test.js && tsd"
+    "test": "standard && lab --timeout 100000 test.js && tsd",
+    "prepare": "husky"
   },
   "keywords": [
     "hapi",
@@ -25,20 +29,20 @@
     "@hapi/hapi": "^21.0.0",
     "@hapi/lab": "^25.0.0",
     "@types/node": "^18.0.0",
-    "coveralls": "^3.1.1",
+    "coveralls-next": "^5.0.0",
     "flush-write-stream": "^2.0.0",
+    "husky": "^9.1.7",
     "make-promises-safe": "^5.1.0",
     "pino-pretty": "^9.0.0",
-    "pre-commit": "^1.2.2",
     "split2": "^4.1.0",
     "standard": "^17.0.0",
     "tsd": "^0.20.0"
   },
   "dependencies": {
-    "@hapi/hoek": "^11.0.0",
+    "@hapi/hoek": "^11.0.7",
     "abstract-logging": "^2.0.1",
     "get-caller-file": "^2.0.5",
-    "pino": "^8.5.0"
+    "pino": "^9.9.0"
   },
   "repository": {
     "type": "git",
