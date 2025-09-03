@@ -8,6 +8,7 @@ post-processing.
 
 | hapi-pino     | hapi          | pino          |
 | ------------- |:--------------|:--------------|
+| v13.x         | v21           | v9            |
 | v12.x         | v21           | v8            |
 | v11.x         | v20           | v8            |
 | v9.x - v10.x  | v20           | v7            |
